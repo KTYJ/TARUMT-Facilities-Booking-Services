@@ -14,12 +14,14 @@ public class Booking {
     private User user;
     private Venue venue;
     private TimeSlot slot;
+    private boolean 
 
     public Booking(String bookingId, User user, Venue venue, TimeSlot slot) {
         this.bookingId = bookingId;
         this.user = user;
         this.venue = venue;
         this.slot = slot;
+        this
     }
 
     public String getBookingId() {

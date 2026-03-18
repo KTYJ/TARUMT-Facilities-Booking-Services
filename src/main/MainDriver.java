@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
 package main;
+
 import adt.UserDQ;
 import java.util.Iterator;
 
@@ -15,8 +16,7 @@ public class MainDriver {
     /**
      * @param args the command line arguments
      */
-
-    public static void main(String[] args) {
+    private void testADT() {
         // this one gpt ya ltr just for testing the LinkedDeque implementation
         UserDQ<Integer> deque = new UserDQ<>();
 
@@ -43,7 +43,7 @@ public class MainDriver {
 
         System.out.println("\n=== reverse iterator ===");
         Iterator<Integer> rev = deque.reverseIterator();
-        
+
         while (rev.hasNext()) {
             System.out.print(rev.next() + " "); // 2 1
         }
@@ -52,6 +52,11 @@ public class MainDriver {
         System.out.println("\n=== clear ===");
         deque.clear();
         System.out.println("isEmpty: " + deque.isEmpty()); // true
+
+    }
+
+    public static void main(String[] args) {
+        
     }
 
 }

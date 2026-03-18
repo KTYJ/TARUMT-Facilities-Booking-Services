@@ -5,12 +5,12 @@ import java.util.NoSuchElementException;
 
 /**
  * A generic doubly-linked deque (double-ended queue) ADT.
- *
+
  * Supports O(1) insertion and removal at both ends.
  *
  * @param <T> the type of elements held in this deque
  */
-public class LinkedDeque<T> {
+public class LinkedDeque<T> implements LinkedDequeInt<T> {
 
     // Define node
     protected static class Node<T> {
