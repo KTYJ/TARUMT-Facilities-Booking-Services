@@ -16,7 +16,7 @@ public class MainDriver {
     /**
      * @param args the command line arguments
      */
-    private void testADT() {
+    private static void testADT() {
         // this one gpt ya ltr just for testing the LinkedDeque implementation
         UserDQ<Integer> deque = new UserDQ<>();
 
@@ -56,6 +56,7 @@ public class MainDriver {
     }
 
     public static void main(String[] args) {
+        testADT();
         
     }
 
