@@ -57,6 +57,7 @@ public class MainDriver {
 
     public static void main(String[] args) {
         testADT();
+        System.out.println("\nYou should be able to read this");
         
     }
 
