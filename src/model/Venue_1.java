@@ -8,30 +8,30 @@ package model;
  *
  * @author User
  */
-public class Venue {
+public class Venue_1 {
     private String venueId;
     private String venueName;
     private VenueStatus status;
     private int capacity;
     
-    public Venue(){
+    public Venue_1(){
     }
     
-    public Venue(String venueId, String venueName, VenueStatus status, int capacity) {
+    public Venue_1(String venueId, String venueName, VenueStatus status, int capacity) {
         this.venueId = venueId;
         this.venueName = venueName;
         this.status = status;
         this.capacity = capacity;
     }
     
-    public Venue(String venueId, String venueName, int capacity){
+    public Venue_1(String venueId, String venueName, int capacity){
         this.venueId = venueId;
         this.venueName = venueName;
         this.status = VenueStatus.AVAILABLE; //default available
         this.capacity = capacity;
     }
     
-    public String getVenueId() {
+    public String getId() {
         return venueId;
     }
     
@@ -75,27 +75,5 @@ public class Venue {
                 ", status=" + status +
                 ", capacity=" + capacity +
                 '}';
-    }
-    
-    public String toFileString() {
-        return venueId + ","
-                + venueName + ","
-                + status + ","
-                + capacity;
-    }
-
-    public static Venue fromFileString(String line) {
-        String[] parts = line.split(",");
-
-        if (parts.length != 4) {
-            return null;
-        }
-
-        String venueId = parts[0];
-        String venueName = parts[1];
-        VenueStatus status = VenueStatus.valueOf(parts[2]);
-        int capacity = Integer.parseInt(parts[3]);
-
-        return new Venue(venueId, venueName, status, capacity);
     }
 }

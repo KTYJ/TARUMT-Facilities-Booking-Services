@@ -8,6 +8,8 @@ package model;
  *
  * @author User
  */
-public class VenueManager {
-    
+public enum AttendanceStatus {
+    NOT_MARKED,
+    SHOW_UP,
+    NO_SHOW
 }

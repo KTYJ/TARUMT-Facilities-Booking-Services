@@ -1,6 +1,6 @@
 package adt;
 
-
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
  *
  * @param <T> the type of elements held in this deque
  */
-public class LinkedDeque<T> implements LinkedDequeInt<T> {
+public class LinkedDeque<T> implements LinkedDequeInt<T>, Iterable<T> {
 
     // Define node
     protected static class Node<T> {
@@ -165,6 +165,28 @@ public class LinkedDeque<T> implements LinkedDequeInt<T> {
         
         sb.append("]");
         return sb.toString();
+    }
+    
+    @Override
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            private Node<T> current = head;
+
+            @Override
+            public boolean hasNext() {
+                return current != null;
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                T data = current.data;
+                current = current.next;
+                return data;
+            }
+        };
     }
 
 }

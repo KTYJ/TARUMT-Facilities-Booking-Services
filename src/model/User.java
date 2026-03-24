@@ -9,7 +9,7 @@ package model;
  * @author User
  */
 public class User {
-    private String Id;
+    private String studentId;
     private String password;
     private String name;
     private UserRole role;
@@ -19,16 +19,16 @@ public class User {
     public User() {
     }
     
-    public User(String Id, String password, String name, UserRole role, UserStatus status){
-        this.Id = Id;
+    public User(String studentId, String password, String name, UserRole role, UserStatus status){
+        this.studentId = studentId;
         this.password = password;
         this.name = name;
         this.role = role;
         this.status = status;
     }
     
-    public User(String Id, String password, String name) {
-        this.Id = Id;
+    public User(String studentId, String password, String name) {
+        this.studentId = studentId;
         this.password = password;
         this.name = name;
         this.role = UserRole.NORMAL_USER;
@@ -36,8 +36,8 @@ public class User {
     }
 
     
-    public String getId(){
-        return Id;
+    public String getStudentId(){
+        return studentId;
     }
     
     public String getPassword(){
@@ -56,8 +56,8 @@ public class User {
         return status;
     }
     
-    public void setId(String Id){
-        this.Id = Id;
+    public void setStudentId(String studentId){
+        this.studentId = studentId;
     }
     
     public void setPassword(String password){
@@ -83,10 +83,10 @@ public class User {
     
     @Override
     public String toString(){
-        return "User{" + "Id='" + Id + '\'' + ", name='" + name + '\'' + ", role=" + role + ", status=" + status;
+        return "User{" + "studentId='" + studentId + '\'' + ", name='" + name + '\'' + ", role=" + role + ", status=" + status + "}";
     }
     public String toFileString(){
-        return Id + "," +
+        return studentId + "," +
                 password + "," +
                 name + "," +
                 role + "," +
@@ -101,13 +101,13 @@ public class User {
             return null;
         }
         
-        String Id = parts[0];
+        String studentId = parts[0];
         String password = parts[1];
         String name = parts[2];
         UserRole role = UserRole.valueOf(parts[3]);
         UserStatus status = UserStatus.valueOf(parts[4]);
         
-        return new User(Id, password, name, role, status);
+        return new User(studentId, password, name, role, status);
         
     }
 }

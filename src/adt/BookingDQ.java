@@ -4,67 +4,31 @@
  */
 package adt;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import model.User;
-
 /**
  *
- * @author KTYJ
+ * @author User
  */
-public class UserDQ<T> extends LinkedDeque<T> implements Iterable<T> {
-    
-    /**
-     * Finds a user object in the ADT by ID.
-     * @param id The ID of the user to find.
-     * @return The user object if found, otherwise null.
-     */
-    public T find(String id) {
-        if (id == null || isEmpty()) {
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import model.Booking;
+
+public class BookingDQ<T> extends LinkedDeque<T> implements Iterable<T> {
+
+    public T find(String bookingId) {
+        if (bookingId == null || isEmpty()) {
             return null;
         }
+
         Node<T> current = head;
         while (current != null) {
-            if (current.data instanceof User s) {
-                if (id.equals(s.getStudentId())) {
+            if (current.data instanceof Booking b) {
+                if (bookingId.equals(b.getBookingId())) {
                     return current.data;
                 }
             }
             current = current.next;
         }
         return null;
-    }
-    
-    public T get(int index){
-        if (index < 0 || index >=size){
-            throw new IndexOutOfBoundsException("Invalid index: " + index);
-        }
-        
-        Node<T> current = head;
-        int currentIndex = 0;
-        
-        while (currentIndex < index){
-            current = current.next;
-            currentIndex++;
-        }
-        
-        return current.data;
-    }
-    
-    public void set(int index, T newValue) {
-    if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException("Invalid index: " + index);
-        }
-
-        Node<T> current = head;
-        int currentIndex = 0;
-
-        while (currentIndex < index) {
-            current = current.next;
-            currentIndex++;
-        }
-
-        current.data = newValue;
     }
 
     @Override
@@ -73,6 +37,7 @@ public class UserDQ<T> extends LinkedDeque<T> implements Iterable<T> {
     }
 
     private class DequeIterator implements Iterator<T> {
+
         private Node<T> current = head;
 
         @Override
@@ -82,20 +47,21 @@ public class UserDQ<T> extends LinkedDeque<T> implements Iterable<T> {
 
         @Override
         public T next() {
-            if (!hasNext())
+            if (!hasNext()) {
                 throw new NoSuchElementException("No more elements");
+            }
             T data = current.data;
             current = current.next;
             return data;
         }
     }
 
-    /** Returns an iterator that traverses from back to front. */
     public Iterator<T> reverseIterator() {
         return new ReverseDequeIterator();
     }
 
     private class ReverseDequeIterator implements Iterator<T> {
+
         private Node<T> current = tail;
 
         @Override
@@ -105,12 +71,12 @@ public class UserDQ<T> extends LinkedDeque<T> implements Iterable<T> {
 
         @Override
         public T next() {
-            if (!hasNext()) 
+            if (!hasNext()) {
                 throw new NoSuchElementException("No more elements");
+            }
             T data = current.data;
             current = current.prev;
-            return data;        
+            return data;
         }
     }
-
 }
