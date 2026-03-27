@@ -45,18 +45,18 @@ public class AdminModule {
             choice = readInt();
 
             switch (choice) {
-                case 1  -> createVenue();
-                case 2  -> updateVenue();
-                case 3  -> removeVenue();
-                case 4  -> searchVenue();
-                case 5  -> blockVenue();
-                case 6  -> acceptRegistrations();
-                case 7  -> waitlistManagement();
-                case 8  -> slotsView();
-                case 9  -> reports();
+                case 1 -> createVenue();
+                case 2 -> updateVenue();
+                case 3 -> removeVenue();
+                case 4 -> searchVenue();
+                case 5 -> blockVenue();
+                case 6 -> acceptRegistrations();
+                case 7 -> waitlistManagement();
+                case 8 -> slotsView();
+                case 9 -> reports();
                 case 10 -> registeredUserLists();
                 case 11 -> historyActions();
-                case 0  -> System.out.println("Logging out...");
+                case 0 -> System.out.println("Logging out...");
                 default -> System.out.println("Invalid choice.");
             }
         } while (choice != 0);
@@ -94,7 +94,8 @@ public class AdminModule {
         }
 
         String id = ValidationUtils.readNonBlankString(sc, "\nEnter Venue ID to update (or 'back'): ");
-        if ("back".equalsIgnoreCase(id)) return;
+        if ("back".equalsIgnoreCase(id))
+            return;
 
         Venue v = (Venue) venues.find(id);
         if (v == null) {
@@ -104,10 +105,12 @@ public class AdminModule {
         System.out.println("Current: " + v);
         System.out.print("New Name (blank to keep): ");
         String name = sc.nextLine().trim(); // Allowing blank here deliberately
-        if (!name.isEmpty()) v.setVenueName(name);
+        if (!name.isEmpty())
+            v.setVenueName(name);
         System.out.print("New Capacity (0 to keep): ");
         int cap = readInt();
-        if (cap > 0) v.setCapacity(cap);
+        if (cap > 0)
+            v.setCapacity(cap);
         VenueDatabase.saveVenues(venues);
         logHistory("VENUE_UPDATED", "ADMIN", id, "Updated venue");
         System.out.println("Venue updated.");
@@ -126,7 +129,8 @@ public class AdminModule {
         }
 
         String id = ValidationUtils.readNonBlankString(sc, "\nEnter Venue ID to remove (or 'back'): ");
-        if ("back".equalsIgnoreCase(id)) return;
+        if ("back".equalsIgnoreCase(id))
+            return;
 
         VenueDQ<Venue> updated = new VenueDQ<>();
         boolean found = false;
@@ -163,7 +167,8 @@ public class AdminModule {
                     any = true;
                 }
             }
-            if (!any) System.out.println("No venues matched.");
+            if (!any)
+                System.out.println("No venues matched.");
         }
     }
 
@@ -180,10 +185,14 @@ public class AdminModule {
         }
 
         String id = ValidationUtils.readNonBlankString(sc, "\nEnter Venue ID to block/unblock (or 'back'): ");
-        if ("back".equalsIgnoreCase(id)) return;
+        if ("back".equalsIgnoreCase(id))
+            return;
 
         Venue v = (Venue) venues.find(id);
-        if (v == null) { System.out.println("Venue not found."); return; }
+        if (v == null) {
+            System.out.println("Venue not found.");
+            return;
+        }
 
         System.out.print("Venue: " + v.getVenueName() + "\n");
         System.out.println("Current status: " + v.getStatus());
@@ -193,14 +202,18 @@ public class AdminModule {
             case 1 -> v.setStatus(VenueStatus.BLOCKED);
             case 2 -> v.setStatus(VenueStatus.MAINTENANCE);
             case 3 -> v.setStatus(VenueStatus.AVAILABLE);
-            default -> { System.out.println("Invalid."); return; }
+            default -> {
+                System.out.println("Invalid.");
+                return;
+            }
         }
         VenueDatabase.saveVenues(venues);
         logHistory("VENUE_STATUS", "ADMIN", id, "Status -> " + v.getStatus());
         System.out.println("Venue status updated to " + v.getStatus());
     }
 
-    // ------------------------------------------------------------------ Registrations
+    // ------------------------------------------------------------------
+    // Registrations
 
     private void acceptRegistrations() {
         LinkedDeque<Registration> regs = RegistrationDatabase.loadRegistrations();
@@ -225,7 +238,8 @@ public class AdminModule {
         }
 
         String regId = ValidationUtils.readNonBlankString(sc, "Enter Registration ID to review (or 'back'): ");
-        if ("back".equalsIgnoreCase(regId)) return;
+        if ("back".equalsIgnoreCase(regId))
+            return;
 
         // Find it
         Registration target = null;
@@ -281,7 +295,8 @@ public class AdminModule {
         }
 
         String bid = ValidationUtils.readNonBlankString(sc, "\nRemove from waitlist? Enter Booking ID (or 'back'): ");
-        if ("back".equalsIgnoreCase(bid)) return;
+        if ("back".equalsIgnoreCase(bid))
+            return;
 
         Booking target = (Booking) bookings.find(bid);
         if (target == null || target.getBookingStatus() != BookingStatus.WAITING) {
@@ -318,7 +333,8 @@ public class AdminModule {
                     hasBooking = true;
                 }
             }
-            if (!hasBooking) System.out.println("  (no bookings)");
+            if (!hasBooking)
+                System.out.println("  (no bookings)");
         }
     }
 
@@ -355,8 +371,10 @@ public class AdminModule {
             int active = 0, waiting = 0;
             for (Booking b : bookings) {
                 if (b.getVenueId().equals(v.getVenueId())) {
-                    if (b.getBookingStatus() == BookingStatus.ACTIVE) active++;
-                    else if (b.getBookingStatus() == BookingStatus.WAITING) waiting++;
+                    if (b.getBookingStatus() == BookingStatus.ACTIVE)
+                        active++;
+                    else if (b.getBookingStatus() == BookingStatus.WAITING)
+                        waiting++;
                 }
             }
             System.out.printf("%-10s %-25s %-8s %-10d %-10d%n",
@@ -368,8 +386,8 @@ public class AdminModule {
         int active = 0, waiting = 0, cancelled = 0, completed = 0, forfeited = 0;
         for (Booking b : bookings) {
             switch (b.getBookingStatus()) {
-                case ACTIVE    -> active++;
-                case WAITING   -> waiting++;
+                case ACTIVE -> active++;
+                case WAITING -> waiting++;
                 case CANCELLED -> cancelled++;
                 case COMPLETED -> completed++;
                 case FORFEITED -> forfeited++;
@@ -448,11 +466,17 @@ public class AdminModule {
             while (hIt.hasNext()) {
                 String eh = hIt.next();
                 int ec = cIt.next();
-                if (eh.equals(hour)) { ec++; found = true; }
+                if (eh.equals(hour)) {
+                    ec++;
+                    found = true;
+                }
                 newH.addLast(eh);
                 newC.addLast(ec);
             }
-            if (!found) { newH.addLast(hour); newC.addLast(1); }
+            if (!found) {
+                newH.addLast(hour);
+                newC.addLast(1);
+            }
             hours = newH;
             counts = newC;
         }

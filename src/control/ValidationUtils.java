@@ -34,7 +34,7 @@ public class ValidationUtils {
         String id;
         while (true) {
             id = readNonBlankString(sc, prompt);
-            if (id.matches("^\\d{3}[a-zA-Z]{3}\\d{4}$")) {
+            if (id.matches("^\\d{2}[a-zA-Z]{3}\\d{5}$")) {
                 return id.toUpperCase();
             }
             System.out.println("Error: Invalid Student ID format. Must be 3 digits, 3 letters, 4 digits (e.g. 21WMR12345).");
