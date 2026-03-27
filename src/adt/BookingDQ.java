@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import model.Booking;
 
-public class BookingDQ<T> extends LinkedDeque<T> implements Iterable<T> {
+public class BookingDQ<T> extends LinkedDeque<T> {
 
     public T find(String bookingId) {
         if (bookingId == null || isEmpty()) {

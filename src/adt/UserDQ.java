@@ -35,6 +35,7 @@ public class UserDQ<T> extends LinkedDeque<T> implements Iterable<T> {
         return null;
     }
     
+    // 
     public T get(int index){
         if (index < 0 || index >=size){
             throw new IndexOutOfBoundsException("Invalid index: " + index);
