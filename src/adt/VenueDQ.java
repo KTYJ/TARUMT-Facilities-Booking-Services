@@ -12,7 +12,7 @@ import model.Venue;
  *
  * @author User
  */
-public class VenueDQ<T> extends LinkedDeque<T> implements Iterable<T> {
+public class VenueDQ<T> extends LinkedDeque<T> {
     public T find(String venueId){
         if (venueId == null || isEmpty()){
             return null;

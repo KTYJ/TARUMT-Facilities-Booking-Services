@@ -18,8 +18,8 @@ public class UserDatabase {
     private static final String FILE_NAME = "users.txt";
 
     /** Loads all users from file into a UserDQ. */
-    public static UserDQ<User> loadUsers() {
-        UserDQ<User> users = new UserDQ<>();
+    public static UserDQ loadUsers() {
+        UserDQ users = new UserDQ();
         File file = new File(FILE_NAME);
         if (!file.exists()) return users;
 
@@ -40,7 +40,7 @@ public class UserDatabase {
     }
 
     /** Overwrites the file with the full deque contents. */
-    public static void saveUsers(UserDQ<User> users) {
+    public static void saveUsers(UserDQ users) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_NAME, false))) {
             for (User user : users) {
                 bw.write(user.toFileString());

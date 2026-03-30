@@ -67,15 +67,13 @@ public class Venue {
         return status == VenueStatus.AVAILABLE;
     }
     
-    @Override
-    public String toString(){
-        return "Venue{" +
-                "id='" + venueId + '\'' +
-                ", venueName='" + venueName + '\'' +
-                ", status=" + status +
-                ", capacity=" + capacity +
-                '}';
+        @Override
+    public String toString() {
+        return venueId + " - " + venueName + 
+        " [" + status + 
+        " | Max: " + capacity + "]";
     }
+
     
     public String toFileString() {
         return venueId + ","
@@ -93,7 +91,7 @@ public class Venue {
 
         String venueId = parts[0];
         String venueName = parts[1];
-        VenueStatus status = VenueStatus.valueOf(parts[2]);
+        VenueStatus status = VenueStatus.valueOf(parts[2].trim());
         int capacity = Integer.parseInt(parts[3]);
 
         return new Venue(venueId, venueName, status, capacity);

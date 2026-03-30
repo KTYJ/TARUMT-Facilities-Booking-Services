@@ -23,12 +23,13 @@ public class ValidationUtils {
                 return input;
             }
             System.out.println("Error: Input cannot be empty. Please try again.");
+            System.out.print("> ");
         }
     }
 
     /**
-     * Reads a valid Student ID (Format: nnnXXXnnnn, e.g., 123ABC4567).
-     * Regex: 3 digits, 3 letters, 4 digits.
+     * Reads a valid Student ID (Format: nnXXXnnNnn, e.g., 21WMR12345).
+     * Regex: 2 digits, 3 letters, 5 digits.
      */
     public static String readStudentId(Scanner sc, String prompt) {
         String id;
@@ -37,12 +38,16 @@ public class ValidationUtils {
             if (id.matches("^\\d{2}[a-zA-Z]{3}\\d{5}$")) {
                 return id.toUpperCase();
             }
-            System.out.println("Error: Invalid Student ID format. Must be 3 digits, 3 letters, 4 digits (e.g. 21WMR12345).");
+            System.out.println(
+                    "Error: Invalid ID format. Must be 2 digits, 3 letters, 4 digits (e.g. 21WMR12345).");
+            System.out.print("> ");
+
         }
     }
-    
+
     /**
-     * Reads a valid Admin/Privileged ID (non-empty). Note: Admin IDs may not follow student format.
+     * Reads a valid Admin/Privileged ID (non-empty). Note: Admin IDs may not follow
+     * student format.
      */
     public static String readUserId(Scanner sc, String prompt) {
         return readNonBlankString(sc, prompt);
@@ -61,6 +66,7 @@ public class ValidationUtils {
                 return dateStr;
             } catch (DateTimeParseException e) {
                 System.out.println("Error: Invalid date format. Please use yyyy-MM-dd (e.g., 2026-03-25).");
+                System.out.print("> ");
             }
         }
     }
@@ -78,10 +84,11 @@ public class ValidationUtils {
                 return timeStr;
             } catch (DateTimeParseException e) {
                 System.out.println("Error: Invalid time format. Please use HH:mm (e.g., 09:00, 14:30).");
+                System.out.print("> ");
             }
         }
     }
-    
+
     /**
      * Reads a valid integer.
      */
@@ -93,6 +100,7 @@ public class ValidationUtils {
                 return Integer.parseInt(line);
             } catch (NumberFormatException e) {
                 System.out.println("Error: Please enter a valid number.");
+                System.out.print("> ");
             }
         }
     }

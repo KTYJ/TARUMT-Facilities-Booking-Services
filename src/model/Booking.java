@@ -58,10 +58,8 @@ public class Booking {
 
     @Override
     public String toString() {
-        return "Booking{id='" + bookingId + "', user='" + userId
-                + "', venue='" + venueId + "', date=" + date
-                + ", time=" + startTime + "-" + endTime
-                + ", status=" + bookingStatus + "}";
+        return String.format("| %-9s | %-10s | %-7s | %-10s | %s-%s | %-9s |",
+                bookingId, userId, venueId, date, startTime, endTime, bookingStatus);
     }
 
     /** CSV: bookingId,userId,venueId,date,startTime,endTime,status */
@@ -75,6 +73,6 @@ public class Booking {
         String[] p = line.split(",");
         if (p.length != 7) return null;
         return new Booking(p[0], p[1], p[2], p[3], p[4], p[5],
-                BookingStatus.valueOf(p[6]));
+                BookingStatus.valueOf(p[6].trim()));
     }
 }

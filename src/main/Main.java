@@ -9,39 +9,48 @@ import dao.UserDatabase;
 import model.User;
 import model.UserStatus;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class Main {
 
-    static String logo = """                                     
-  ::::::::. .::.       :.::;;:.  :::   .::.:::.  .:::.::::::::: 
-  :::;;:::. :;;;.   ::;;:. .:;;  ;;;   :;:.;;;:. .;;;:.:::;;::: 
-     ;;:   .;::;:.  .:;:  ..:;:  ;;;   :;:.;;;;:.:;;;.   :;;    
-     ;;:  .;:. :;:  .:;::;;:.    ;;;   :;:.;;;;::;;;;.   :;;    
-     ;;:  :;;;;;;;. .:;: .:;:    ;;;   :;:.;;::;;;::;.   :;;    
-     ;;: .;:.   :;:..::.   :;:   .;;;:;;;. ;;:.;;:.:;.   :;;    
-                            .:;:    ...                         
-                              .:;:         .                    
-                                 .::::::..                                                         
-""";
+    static String logo = """
+              ::::::::. .::.       :.::;;:.  :::   .::.:::.  .:::.:::::::::
+              :::;;:::. :;;;.   ::;;:. .:;;  ;;;   :;:.;;;:. .;;;:.:::;;:::
+                 ;;:   .;::;:.  .:;:  ..:;:  ;;;   :;:.;;;;:.:;;;.   :;;
+                 ;;:  .;:. :;:  .:;::;;:.    ;;;   :;:.;;;;::;;;;.   :;;
+                 ;;:  :;;;;;;;. .:;: .:;:    ;;;   :;:.;;::;;;::;.   :;;
+                 ;;: .;:.   :;:..::.   :;:   .;;;:;;;. ;;:.;;:.:;.   :;;
+                                        .:;:    ...
+                                          .:;:         .
+                                             .::::::..
+            """;
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         int choice;
+        System.out.print(Main.logo);
 
         do {
-            System.out.print(Main.logo);
-            System.out.println("        FACILITY BOOKING SYSTEM       \n");
+            System.out.println("               TARUMT FACILITY BOOKING SYSTEM       ");
+
+            // Display current date and time
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            System.out.println("        Current Date and Time: " + now.format(formatter) + "\n");
+
             System.out.println("=======================================");
+            System.out.println(" TARUMT FACILITY BOOKING SYSTEM ");
             System.out.println("|  1. Admin Login                     |");
             System.out.println("|  2. Student Login                   |");
             System.out.println("|  3. Privileged User Login           |");
             System.out.println("|  4. Register New Account            |");
+            System.out.println("|  5. View Registration / User Status |");
             System.out.println("|  0. Exit                            |");
             System.out.println("=======================================");
 
-            System.out.print("Choice: ");
-            choice = readInt(sc);
+            choice = readInt(sc, "Choice: ");
 
             switch (choice) {
                 case 1 ->
@@ -52,6 +61,8 @@ public class Main {
                     new PrivilegedModule(sc).loginAndRun();
                 case 4 ->
                     new RegisterModule(sc).run();
+                case 5 ->
+                    new RegisterModule(sc).viewRegistrationStatus();
                 case 0 ->
                     System.out.println("Goodbye!");
                 default ->
@@ -69,7 +80,7 @@ public class Main {
         String id = control.ValidationUtils.readUserId(sc, "Admin ID: ");
         String pw = control.ValidationUtils.readNonBlankString(sc, "Password: ");
 
-        UserDQ<User> users = UserDatabase.loadUsers();
+        UserDQ users = UserDatabase.loadUsers();
         User u = (User) users.find(id);
         if (u == null) {
             System.out.println("Admin not found.");
@@ -91,8 +102,8 @@ public class Main {
         System.out.println("Welcome, " + u.getName() + "!");
         new AdminModule(sc).run();
     }
-
-    private static int readInt(Scanner sc) {
-        return control.ValidationUtils.readInt(sc, "");
+    
+    private static int readInt(Scanner sc, String prompt) {
+        return control.ValidationUtils.readInt(sc, prompt);
     }
 }

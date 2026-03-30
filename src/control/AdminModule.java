@@ -1,7 +1,13 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+
 package control;
 
 import adt.BookingDQ;
 import adt.LinkedDeque;
+import adt.SorterDQ;
 import adt.UserDQ;
 import adt.VenueDQ;
 import dao.*;
@@ -9,7 +15,6 @@ import model.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Iterator;
 import java.util.Scanner;
 
 /**
@@ -29,16 +34,16 @@ public class AdminModule {
         do {
             System.out.println("\n========= ADMIN PANEL =========");
             System.out.println(" 1. Create Venue");
-            System.out.println(" 2. Update Venue");
+            System.out.println(" 2. Update / Block Venue");
             System.out.println(" 3. Remove Venue");
             System.out.println(" 4. Search Venue");
-            System.out.println(" 5. Block / Unblock Venue");
-            System.out.println(" 6. Accept Registrations");
-            System.out.println(" 7. Waitlist Management");
-            System.out.println(" 8. Slots View");
+            System.out.println(" 5. Accept Registrations");
+            System.out.println(" 6. Waitlist Management");
+            System.out.println(" 7. Slots View");
+            System.out.println(" 8. Manage Bookings");
             System.out.println(" 9. Reports");
             System.out.println("10. Registered User Lists");
-            System.out.println("11. History Actions");
+            System.out.println("11. Edit User Details");
             System.out.println(" 0. Logout");
             System.out.println("================================");
             System.out.print("Choice: ");
@@ -49,13 +54,13 @@ public class AdminModule {
                 case 2 -> updateVenue();
                 case 3 -> removeVenue();
                 case 4 -> searchVenue();
-                case 5 -> blockVenue();
-                case 6 -> acceptRegistrations();
-                case 7 -> waitlistManagement();
-                case 8 -> slotsView();
+                case 5 -> acceptRegistrations();
+                case 6 -> waitlistManagement();
+                case 7 -> slotsView();
+                case 8 -> manageBookings();
                 case 9 -> reports();
                 case 10 -> registeredUserLists();
-                case 11 -> historyActions();
+                case 11 -> editUserDetails();
                 case 0 -> System.out.println("Logging out...");
                 default -> System.out.println("Invalid choice.");
             }
@@ -93,6 +98,8 @@ public class AdminModule {
             System.out.println("  [" + v.getVenueId() + "] " + v.getVenueName() + " (Cap: " + v.getCapacity() + ")");
         }
 
+        boolean changed = false;
+
         String id = ValidationUtils.readNonBlankString(sc, "\nEnter Venue ID to update (or 'back'): ");
         if ("back".equalsIgnoreCase(id))
             return;
@@ -105,19 +112,54 @@ public class AdminModule {
         System.out.println("Current: " + v);
         System.out.print("New Name (blank to keep): ");
         String name = sc.nextLine().trim(); // Allowing blank here deliberately
-        if (!name.isEmpty())
+        if (!name.isEmpty()) {
             v.setVenueName(name);
+            changed = true;
+        }
         System.out.print("New Capacity (0 to keep): ");
         int cap = readInt();
-        if (cap > 0)
+        if (cap > 0) {
             v.setCapacity(cap);
-        VenueDatabase.saveVenues(venues);
-        logHistory("VENUE_UPDATED", "ADMIN", id, "Updated venue");
-        System.out.println("Venue updated.");
+            changed = true;
+        }
+
+        System.out.println("Current status: " + v.getStatus());
+        System.out.print("New Status (1) BLOCKED  (2) MAINTENANCE  (3) AVAILABLE (0 to keep): ");
+        int opt = readInt();
+        if (opt != 0) {
+            switch (opt) {
+                case 1 -> {
+                    v.setStatus(VenueStatus.BLOCKED);
+                    changed = true;
+                }
+                case 2 -> {
+                    v.setStatus(VenueStatus.MAINTENANCE);
+                    changed = true;
+                }
+                case 3 -> {
+                    v.setStatus(VenueStatus.AVAILABLE);
+                    changed = true;
+                }
+                default -> System.out.println("Invalid default status choice, keeping current status.");
+            }
+            if (opt >= 1 && opt <= 3) {
+                logHistory("VENUE_STATUS", "ADMIN", id, "Status -> " + v.getStatus());
+            }
+        }
+
+        if (changed) {
+            VenueDatabase.saveVenues(venues);
+            logHistory("VENUE_UPDATED", "ADMIN", id, "Updated venue");
+            System.out.println("Venue updated successfully.");
+        } else {
+            System.out.println("No changes made.");
+        }
     }
 
     private void removeVenue() {
         VenueDQ<Venue> venues = VenueDatabase.loadVenues();
+        BookingDQ<Booking> bookings = BookingDatabase.loadBookings();
+
         if (venues.isEmpty()) {
             System.out.println("No venues available to remove.");
             return;
@@ -131,6 +173,13 @@ public class AdminModule {
         String id = ValidationUtils.readNonBlankString(sc, "\nEnter Venue ID to remove (or 'back'): ");
         if ("back".equalsIgnoreCase(id))
             return;
+
+        for (Booking b : bookings) {
+            if (b.getVenueId().equals(id) && b.getBookingStatus() == BookingStatus.ACTIVE) {
+                System.out.println("Error: Cannot remove this venue because it has active bookings.");
+                return;
+            }
+        }
 
         VenueDQ<Venue> updated = new VenueDQ<>();
         boolean found = false;
@@ -170,46 +219,6 @@ public class AdminModule {
             if (!any)
                 System.out.println("No venues matched.");
         }
-    }
-
-    private void blockVenue() {
-        VenueDQ<Venue> venues = VenueDatabase.loadVenues();
-        if (venues.isEmpty()) {
-            System.out.println("No venues available to block/unblock.");
-            return;
-        }
-
-        System.out.println("\n--- Available Venues ---");
-        for (Venue v : venues) {
-            System.out.println("  [" + v.getVenueId() + "] " + v.getVenueName() + " (Status: " + v.getStatus() + ")");
-        }
-
-        String id = ValidationUtils.readNonBlankString(sc, "\nEnter Venue ID to block/unblock (or 'back'): ");
-        if ("back".equalsIgnoreCase(id))
-            return;
-
-        Venue v = (Venue) venues.find(id);
-        if (v == null) {
-            System.out.println("Venue not found.");
-            return;
-        }
-
-        System.out.print("Venue: " + v.getVenueName() + "\n");
-        System.out.println("Current status: " + v.getStatus());
-        System.out.print("Set to (1) BLOCKED  (2) MAINTENANCE  (3) AVAILABLE: ");
-        int opt = readInt();
-        switch (opt) {
-            case 1 -> v.setStatus(VenueStatus.BLOCKED);
-            case 2 -> v.setStatus(VenueStatus.MAINTENANCE);
-            case 3 -> v.setStatus(VenueStatus.AVAILABLE);
-            default -> {
-                System.out.println("Invalid.");
-                return;
-            }
-        }
-        VenueDatabase.saveVenues(venues);
-        logHistory("VENUE_STATUS", "ADMIN", id, "Status -> " + v.getStatus());
-        System.out.println("Venue status updated to " + v.getStatus());
     }
 
     // ------------------------------------------------------------------
@@ -260,7 +269,7 @@ public class AdminModule {
         if (opt == 1) {
             target.setStatus("APPROVED");
             // Create actual user
-            UserDQ<User> users = UserDatabase.loadUsers();
+            UserDQ users = UserDatabase.loadUsers();
             UserRole role = UserRole.valueOf(target.getRole());
             String priv = target.getFacilityPrivilege();
             User newUser = new User(target.getId(), "default123", target.getName(),
@@ -338,35 +347,113 @@ public class AdminModule {
         }
     }
 
+    // ------------------------------------------------------------------ Manage
+    // Bookings
+
+    private void manageBookings() {
+        BookingDQ<Booking> bookings = BookingDatabase.loadBookings();
+        if (bookings.isEmpty()) {
+            System.out.println("No bookings available.");
+            return;
+        }
+
+        System.out.println("\n--- All Bookings ---");
+        for (Booking b : bookings) {
+            System.out.println("  [" + b.getBookingId() + "] by " + b.getUserId() +
+                    " for " + b.getVenueId() +
+                    " (" + b.getDate() + " " + b.getStartTime() + "-" + b.getEndTime() + "), Status: "
+                    + b.getBookingStatus());
+        }
+
+        String bid = ValidationUtils.readNonBlankString(sc, "\nEnter Booking ID to manage (or 'back'): ");
+        if ("back".equalsIgnoreCase(bid))
+            return;
+
+        Booking target = (Booking) bookings.find(bid);
+        if (target == null) {
+            System.out.println("Booking not found.");
+            return;
+        }
+
+        System.out.println("\nEditing Booking: " + target.getBookingId());
+        System.out.println("Current Status: " + target.getBookingStatus());
+        System.out.println("Statuses:");
+        BookingStatus[] statuses = BookingStatus.values();
+        for (int i = 0; i < statuses.length; i++) {
+            System.out.println("  " + (i + 1) + ") " + statuses[i]);
+        }
+
+        while (true) {
+            System.out.print("Select new status (enter number, leave blank to skip): ");
+            String sChoice = sc.nextLine().trim();
+            if (sChoice.isEmpty()) {
+                System.out.println("No changes made.");
+                return;
+            }
+            try {
+                int sIdx = Integer.parseInt(sChoice);
+                if (sIdx >= 1 && sIdx <= statuses.length) {
+                    BookingStatus oldStatus = target.getBookingStatus();
+                    BookingStatus newStatus = statuses[sIdx - 1];
+
+                    target.setBookingStatus(newStatus);
+                    BookingDatabase.saveBookings(bookings);
+                    logHistory("BOOKING_STATUS", "ADMIN", target.getVenueId(),
+                            "Updated booking " + target.getBookingId() + " to " + newStatus);
+                    System.out.println("Booking status updated successfully.");
+
+                    if (oldStatus == BookingStatus.ACTIVE && newStatus == BookingStatus.CANCELLED ||
+                            oldStatus == BookingStatus.ACTIVE && newStatus == BookingStatus.FORFEITED) {
+                        BookingUtils.promoteWaitlist(target);
+                    }
+
+                    break;
+                } else {
+                    System.out.println("Error: Invalid status number.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Please enter a valid number.");
+            }
+        }
+    }
+
     // ------------------------------------------------------------------ Reports
 
     private void reports() {
-        BookingDQ<Booking> bookings = BookingDatabase.loadBookings();
-        VenueDQ<Venue> venues = VenueDatabase.loadVenues();
-        UserDQ<User> users = UserDatabase.loadUsers();
+        int opt = 0;
+        do {
+            BookingDQ<Booking> bookings = BookingDatabase.loadBookings();
+            VenueDQ<Venue> venues = VenueDatabase.loadVenues();
+            UserDQ users = UserDatabase.loadUsers();
 
-        System.out.println("\n========== REPORTS ==========");
-        System.out.println("1. Venue Utilization Summary");
-        System.out.println("2. Booking Status Breakdown");
-        System.out.println("3. Most Active Users");
-        System.out.println("4. Peak Time Analysis");
-        System.out.println("0. Back");
-        System.out.print("Choice: ");
-        int opt = readInt();
-
-        switch (opt) {
-            case 1 -> reportVenueUtilization(venues, bookings);
-            case 2 -> reportBookingStatus(bookings);
-            case 3 -> reportActiveUsers(bookings, users);
-            case 4 -> reportPeakTime(bookings);
-        }
+            System.out.println("\n========== REPORTS ==========");
+            System.out.println("1. Venue Utilization Summary");
+            System.out.println("2. Booking Status Breakdown");
+            System.out.println("3. Most Active Users");
+            System.out.println("4. Peak Time Analysis");
+            System.out.println("5. History Actions");
+            System.out.println("0. Back");
+            System.out.print("Choice: ");
+            opt = readInt();
+            if(opt < 0 || opt > 5){
+                System.out.println("Invalid choice. Please try again.");
+                continue;
+            }
+            switch (opt) {
+                case 1 -> reportVenueUtilization(venues, bookings);
+                case 2 -> reportBookingStatus(bookings);
+                case 3 -> reportActiveUsers(bookings, users);
+                case 4 -> reportPeakTime(bookings);
+                case 5 -> historyActions();
+            }
+        } while (opt != 0);
     }
 
     private void reportVenueUtilization(VenueDQ<Venue> venues, BookingDQ<Booking> bookings) {
         System.out.println("\n--- Venue Utilization ---");
-        System.out.printf("%-10s %-25s %-8s %-10s %-10s%n",
+        System.out.printf("%-10s %-25s %-11s %-10s %-10s%n",
                 "ID", "Name", "Status", "Bookings", "Waitlist");
-        System.out.println("-".repeat(65));
+        System.out.println("-".repeat(70));
         for (Venue v : venues) {
             int active = 0, waiting = 0;
             for (Booking b : bookings) {
@@ -377,7 +464,7 @@ public class AdminModule {
                         waiting++;
                 }
             }
-            System.out.printf("%-10s %-25s %-8s %-10d %-10d%n",
+            System.out.printf("%-10s %-25s %-11s %-11d %-11d%n",
                     v.getVenueId(), v.getVenueName(), v.getStatus(), active, waiting);
         }
     }
@@ -402,106 +489,383 @@ public class AdminModule {
         System.out.println("Total     : " + bookings.size());
     }
 
-    private void reportActiveUsers(BookingDQ<Booking> bookings, UserDQ<User> users) {
-        System.out.println("\n--- Most Active Users (by booking count) ---");
-        // Build a simple count using the deque
-        LinkedDeque<String> countedIds = new LinkedDeque<>();
-        LinkedDeque<Integer> counts = new LinkedDeque<>();
+    // private void reportActiveUsers(BookingDQ<Booking> bookings, UserDQ users) {
+    //     System.out.println("\n--- Most Active Users (by booking count) ---");
+    //     LinkedDeque<String> countedIds = new LinkedDeque<>();
+    //     LinkedDeque<Integer> counts = new LinkedDeque<>();
+
+    //     for (Booking b : bookings) {
+    //         String uid = b.getUserId();
+    //         boolean found = false;
+    //         // Walk both deques in parallel using iterators
+    //         Iterator<String> idIt = countedIds.iterator();
+    //         Iterator<Integer> cntIt = counts.iterator();
+    //         LinkedDeque<String> newIds = new LinkedDeque<>();
+    //         LinkedDeque<Integer> newCnts = new LinkedDeque<>();
+
+    //         while (idIt.hasNext()) {
+    //             String existId = idIt.next();
+    //             int existCnt = cntIt.next();
+    //             if (existId.equals(uid)) {
+    //                 existCnt++;
+    //                 found = true;
+    //             }
+    //             newIds.addLast(existId);
+    //             newCnts.addLast(existCnt);
+    //         }
+    //         if (!found) {
+    //             newIds.addLast(uid);
+    //             newCnts.addLast(1);
+    //         }
+    //         countedIds = newIds;
+    //         counts = newCnts;
+    //     }
+
+    //     // Print
+    //     System.out.printf("%-15s %-20s %-10s%n", "User ID", "Name", "Bookings");
+    //     System.out.println("-".repeat(45));
+    //     Iterator<String> idIt = countedIds.iterator();
+    //     Iterator<Integer> cntIt = counts.iterator();
+    //     while (idIt.hasNext()) {
+    //         String uid = idIt.next();
+    //         int cnt = cntIt.next();
+    //         User u = (User) users.find(uid);
+    //         String uname = (u != null) ? u.getName() : "Unknown";
+    //         System.out.printf("%-15s %-20s %-10d%n", uid, uname, cnt);
+    //     }
+    // }
+
+    private void reportActiveUsers(BookingDQ<Booking> bookings, UserDQ users) {
+        SorterDQ sorterDQ = new SorterDQ();   // rows: [userId, name, count]
 
         for (Booking b : bookings) {
             String uid = b.getUserId();
             boolean found = false;
-            // Walk both deques in parallel using iterators
-            Iterator<String> idIt = countedIds.iterator();
-            Iterator<Integer> cntIt = counts.iterator();
-            LinkedDeque<String> newIds = new LinkedDeque<>();
-            LinkedDeque<Integer> newCnts = new LinkedDeque<>();
-
-            while (idIt.hasNext()) {
-                String existId = idIt.next();
-                int existCnt = cntIt.next();
-                if (existId.equals(uid)) {
-                    existCnt++;
+            //if found, increment count
+            for (String[] row : sorterDQ) {
+                if (row[0].equals(uid)) {
+                    row[2] = String.valueOf(Integer.parseInt(row[2]) + 1);
                     found = true;
+                    break;
                 }
-                newIds.addLast(existId);
-                newCnts.addLast(existCnt);
             }
+            // if not found, add new row of user
             if (!found) {
-                newIds.addLast(uid);
-                newCnts.addLast(1);
+                User u = users.find(uid);
+                String uname = (u != null) ? u.getName() : "Unknown";
+                sorterDQ.addLast(new String[]{uid, uname, "1"});
             }
-            countedIds = newIds;
-            counts = newCnts;
         }
 
-        // Print
+        // ── 2. Sort descending by booking count (last element) ────────────────────
+        sorterDQ.sort(true);   // true = descending (most active first)
+
+        // ── 3. Print ──────────────────────────────────────────────────────────────
+        System.out.println("\n--- Most Active Users (by booking count) ---");
         System.out.printf("%-15s %-20s %-10s%n", "User ID", "Name", "Bookings");
         System.out.println("-".repeat(45));
-        Iterator<String> idIt = countedIds.iterator();
-        Iterator<Integer> cntIt = counts.iterator();
-        while (idIt.hasNext()) {
-            String uid = idIt.next();
-            int cnt = cntIt.next();
-            User u = (User) users.find(uid);
-            String uname = (u != null) ? u.getName() : "Unknown";
-            System.out.printf("%-15s %-20s %-10d%n", uid, uname, cnt);
+        for (String[] row : sorterDQ) {
+            System.out.printf("%-15s %-20s %-10s%n", row[0], row[1], row[2]);
         }
     }
+    
+    // private void reportPeakTime(BookingDQ<Booking> bookings) {
+    //     System.out.println("\n--- Peak Time Analysis (by start hour) ---");
+    //     // Count bookings per start-time hour
+    //     LinkedDeque<String> hours = new LinkedDeque<>();
+    //     LinkedDeque<Integer> counts = new LinkedDeque<>();
+
+    //     for (Booking b : bookings) {
+    //         String hour = b.getStartTime(); // e.g. "09:00"
+    //         boolean found = false;
+    //         Iterator<String> hIt = hours.iterator();
+    //         Iterator<Integer> cIt = counts.iterator();
+    //         LinkedDeque<String> newH = new LinkedDeque<>();
+    //         LinkedDeque<Integer> newC = new LinkedDeque<>();
+
+    //         while (hIt.hasNext()) {
+    //             String eh = hIt.next();
+    //             int ec = cIt.next();
+    //             if (eh.equals(hour)) {
+    //                 ec++;
+    //                 found = true;
+    //             }
+    //             newH.addLast(eh);
+    //             newC.addLast(ec);
+    //         }
+    //         if (!found) {
+    //             newH.addLast(hour);
+    //             newC.addLast(1);
+    //         }
+    //         hours = newH;
+    //         counts = newC;
+    //     }
+
+    //     System.out.printf("%-10s %-10s%n", "Time", "Bookings");
+    //     System.out.println("-".repeat(20));
+    //     Iterator<String> hIt = hours.iterator();
+    //     Iterator<Integer> cIt = counts.iterator();
+    //     while (hIt.hasNext()) {
+    //         System.out.printf("%-10s %-10d%n", hIt.next(), cIt.next());
+    //     }
+    // }
 
     private void reportPeakTime(BookingDQ<Booking> bookings) {
-        System.out.println("\n--- Peak Time Analysis (by start hour) ---");
-        // Count bookings per start-time hour
-        LinkedDeque<String> hours = new LinkedDeque<>();
-        LinkedDeque<Integer> counts = new LinkedDeque<>();
+        // ── 1. Tally bookings per start-time slot ─────────────────────────────────
+        SorterDQ sorterDQ = new SorterDQ();   // rows: [hour, count]
 
         for (Booking b : bookings) {
-            String hour = b.getStartTime(); // e.g. "09:00"
+            String hour = b.getStartTime();   // e.g. "09:00"
             boolean found = false;
-            Iterator<String> hIt = hours.iterator();
-            Iterator<Integer> cIt = counts.iterator();
-            LinkedDeque<String> newH = new LinkedDeque<>();
-            LinkedDeque<Integer> newC = new LinkedDeque<>();
 
-            while (hIt.hasNext()) {
-                String eh = hIt.next();
-                int ec = cIt.next();
-                if (eh.equals(hour)) {
-                    ec++;
+            for (String[] row : sorterDQ) {
+                if (row[0].equals(hour)) {
+                    row[1] = String.valueOf(Integer.parseInt(row[1]) + 1);
                     found = true;
+                    break;
                 }
-                newH.addLast(eh);
-                newC.addLast(ec);
             }
             if (!found) {
-                newH.addLast(hour);
-                newC.addLast(1);
+                sorterDQ.addLast(new String[]{hour, "1"});
             }
-            hours = newH;
-            counts = newC;
         }
 
+        // ── 2. Sort descending by booking count (last element) ────────────────────
+        sorterDQ.sort(true);   // true = descending (busiest slot first)
+
+        // ── 3. Print ──────────────────────────────────────────────────────────────
+        System.out.println("\n--- Peak Time Analysis (by start hour) ---");
         System.out.printf("%-10s %-10s%n", "Time", "Bookings");
         System.out.println("-".repeat(20));
-        Iterator<String> hIt = hours.iterator();
-        Iterator<Integer> cIt = counts.iterator();
-        while (hIt.hasNext()) {
-            System.out.printf("%-10s %-10d%n", hIt.next(), cIt.next());
+        for (String[] row : sorterDQ) {
+            System.out.printf("%-10s %-10s%n", row[0], row[1]);
         }
     }
 
     // ------------------------------------------------------------------ User Lists
 
     private void registeredUserLists() {
-        UserDQ<User> users = UserDatabase.loadUsers();
-        System.out.println("\n--- Registered Users ---");
-        System.out.printf("%-15s %-20s %-15s %-10s %-15s%n",
-                "ID", "Name", "Role", "Status", "Privilege");
-        System.out.println("-".repeat(75));
-        for (User u : users) {
+        UserDQ users = UserDatabase.loadUsers();
+        int choice;
+
+        do {
+            System.out.println("\n--- Registered Users ---");
             System.out.printf("%-15s %-20s %-15s %-10s %-15s%n",
-                    u.getStudentId(), u.getName(), u.getRole(),
-                    u.getStatus(), u.getFacilityPrivilege());
+                    "ID", "Name", "Role", "Status", "Privilege");
+            System.out.println("-".repeat(75));
+            for (User u : users) {
+                System.out.printf("%-15s %-20s %-15s %-10s %-15s%n",
+                        u.getStudentId(), u.getName(), u.getRole(),
+                        u.getStatus(), u.getFacilityPrivilege());
+            }
+
+            System.out.println("\nSort by...");
+            System.out.println("1. Student ID");
+            System.out.println("2. Name");
+            System.out.println("3. Role");
+            System.out.println("4. Status");
+            System.out.println("0. Back");
+            System.out.print("Choice: ");
+            choice = readInt();
+
+            String criterion = null;
+            switch (choice) {
+                case 1 -> criterion = "ID";
+                case 2 -> criterion = "NAME";
+                case 3 -> criterion = "ROLE";
+                case 4 -> criterion = "STATUS";
+                case 0 -> System.out.println("Returning to main menu...");
+                default -> System.out.println("Invalid choice, please try again.");
+            }
+
+            if (criterion != null) {
+                users.sortBy(criterion);
+                System.out.println("\n>> Successfully sorted by " + criterion + ".");
+            }
+        } while (choice != 0);
+    }
+
+    // ------------------------------------------------------------------ Edit User
+    // Details
+    private void editUserDetails() {
+        UserDQ users = UserDatabase.loadUsers();
+        if (users.isEmpty()) {
+            System.out.println("No users available.");
+            return;
+        }
+
+        System.out.println("\n--- All Users ---");
+        int count = 1;
+        for (User u : users) {
+            System.out.println("  " + count + ") [" + u.getStudentId() + "] " + u.getName() + " (" + u.getRole() + ")");
+            count++;
+        }
+
+        System.out.print("\nEnter user number to edit (or 0 to go back): ");
+        int choice = readInt();
+        if (choice <= 0 || choice >= count) {
+            return;
+        }
+
+        User target = users.get(choice - 1);
+
+        System.out.println("\nEditing User: " + target);
+        boolean changed = false;
+
+        // 1. ID
+        String newId;
+        while (true) {
+            System.out.print("Enter new ID (leave blank to skip): ");
+            newId = sc.nextLine().trim();
+            if (newId.isEmpty())
+                break;
+
+            if (users.find(newId) != null && !newId.equals(target.getStudentId())) {
+                System.out.println("Error: ID already exists. Must be unique.");
+                continue;
+            }
+            target.setStudentId(newId);
+            changed = true;
+            break;
+        }
+
+        // 2. Password
+        String pw;
+        while (true) {
+            System.out.print("Enter new password (leave blank to skip): ");
+            pw = sc.nextLine().trim();
+            if (pw.isEmpty())
+                break;
+            if (pw.contains(",")) {
+                System.out.println("Error: Password cannot contain commas.");
+                continue;
+            }
+            if (pw.length() < 5) {
+                System.out.println("Error: Password must be at least 5 characters long.");
+                continue;
+            }
+            target.setPassword(pw);
+            changed = true;
+            break;
+        }
+
+        // 3. Name
+        String newName;
+        while (true) {
+            System.out.print("Enter new name (leave blank to skip): ");
+            newName = sc.nextLine().trim();
+            if (newName.isEmpty())
+                break;
+            if (newName.contains(",")) {
+                System.out.println("Error: Name cannot contain commas.");
+                continue;
+            }
+            target.setName(newName);
+            changed = true;
+            break;
+        }
+
+        // 4. Role
+        System.out.println("Roles:");
+        UserRole[] roles = UserRole.values();
+        for (int i = 0; i < roles.length; i++) {
+            System.out.println("  " + (i + 1) + ") " + roles[i]);
+        }
+        while (true) {
+            System.out.print("Select new role (enter number, leave blank to skip): ");
+            String rChoice = sc.nextLine().trim();
+            if (rChoice.isEmpty())
+                break;
+            try {
+                int rIdx = Integer.parseInt(rChoice);
+                if (rIdx >= 1 && rIdx <= roles.length) {
+                    target.setRole(roles[rIdx - 1]);
+                    changed = true;
+                    break;
+                } else {
+                    System.out.println("Error: Invalid role number.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Please enter a valid number.");
+            }
+        }
+
+        // 5. Status
+        System.out.println("Statuses:");
+        System.out.println("  1) APPROVED");
+        System.out.println("  2) SUSPENDED");
+        while (true) {
+            System.out.print("Select new status (enter number, leave blank to skip): ");
+            String sChoice = sc.nextLine().trim();
+            if (sChoice.isEmpty())
+                break;
+            if (sChoice.equals("1")) {
+                target.setStatus(UserStatus.APPROVED);
+                changed = true;
+                break;
+            } else if (sChoice.equals("2")) {
+                target.setStatus(UserStatus.SUSPENDED);
+                changed = true;
+                break;
+            } else {
+                System.out.println("Error: Invalid status number. Must be 1 or 2.");
+            }
+        }
+
+        // 6. Facility Privilege
+        if (target.getRole() == UserRole.PRIVILEGED_USER) {
+            VenueDQ<Venue> venues = VenueDatabase.loadVenues();
+            System.out.println("Facility Privileges:");
+            System.out.println("  1) NONE");
+            int vCount = 2;
+            for (Venue v : venues) {
+                System.out.println("  " + vCount + ") " + v.getVenueName());
+                vCount++;
+            }
+
+            while (true) {
+                System.out.print("Select new facility privilege (enter number, leave blank to skip): ");
+                String pChoice = sc.nextLine().trim();
+                if (pChoice.isEmpty())
+                    break;
+
+                try {
+                    int pIdx = Integer.parseInt(pChoice);
+                    if (pIdx == 1) {
+                        target.setFacilityPrivilege("NONE");
+                        changed = true;
+                        break;
+                    } else if (pIdx >= 2 && pIdx < vCount) {
+                        int currentIdx = 2;
+                        for (Venue v : venues) {
+                            if (currentIdx == pIdx) {
+                                target.setFacilityPrivilege(v.getVenueId());
+                                changed = true;
+                                break;
+                            }
+                            currentIdx++;
+                        }
+                        break;
+                    } else {
+                        System.out.println("Error: Invalid privilege number.");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Error: Please enter a valid number.");
+                }
+            }
+        } else {
+            if (!"NONE".equals(target.getFacilityPrivilege())) {
+                target.setFacilityPrivilege("NONE");
+                changed = true;
+            }
+        }
+
+        if (changed) {
+            UserDatabase.saveUsers(users);
+            System.out.println("User details updated successfully.");
+            logHistory("USER_UPDATED", "ADMIN", "-", "Updated details for: " + target.getStudentId());
+        } else {
+            System.out.println("No changes made.");
         }
     }
 

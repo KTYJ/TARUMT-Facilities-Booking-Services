@@ -53,11 +53,13 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{id='" + studentId + "', name='" + name
-                + "', role=" + role + ", status=" + status
-                + ", privilege=" + facilityPrivilege + "}";
+        return "[" + studentId + "] " + name
+                + " - " + role + " - (" + status
+                + ") (Privilege: " + facilityPrivilege + ")";
     }
 
+
+    
     /** CSV: studentId,password,name,role,status,facilityPrivilege */
     public String toFileString() {
         return studentId + "," + password + "," + name + ","
