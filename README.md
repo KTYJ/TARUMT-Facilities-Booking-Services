@@ -1,29 +1,163 @@
-# TARUMT-Facilities-Booking-Services
-Facility Booking System for DSA Assignment
+# TARUMT Facilities Booking System
 
-## Features Overview
+A comprehensive facility booking solution for TARUMT, supporting multiple user roles with distinct permissions and capabilities.
 
-This system provides a comprehensive facility booking solution tailored for different types of users: Administrators, Normal Students, and Privileged Users. Below is an overview of the system capabilities:
+---
 
-### 🛠️ Admin Features
-- **Venue Management:** Create, update, remove, and search for venues. Admins can update venue capacities or status (e.g., mark as Blocked or under Maintenance).
-- **Registration Approval:** Review, approve, or reject new user registrations.
-- **Waitlist Management:** Monitor and manage users on the waitlist for various bookings.
-- **Booking Management:** View all bookings across venues ("Slots View"), manually override booking statuses (Active, Waitlisted, Cancelled, Completed, Forfeited), and trigger automatic waitlist promotion.
-- **User Management:** View registered user lists and edit user details.
-- **Comprehensive Reports:** Generate system reports including Venue Utilization Summary, Booking Status Breakdown, Most Active Users, Peak Time Analysis, and historical action logs.
+## 📋 Table of Contents
 
-### 🎓 Student (Normal User) Features
-- **Facility Booking:** Check available slots and book venues without overlap.
-- **Waitlist Registration:** Join a waitlist for slots that are currently occupied.
-- **Slots View:** Check the availability and booked times for all venues.
-- **Manage Bookings:** View own booking history and cancel active bookings (which smoothly promotes waitlisted users).
-- **Profile Management:** Update account credentials/password.
+- [Features](#features)
+- [User Roles](#user-roles)
+- [Data Structures & Algorithms](#data-structures--algorithms)
+- [Technical Stack](#technical-stack)
 
-### 🌟 Privileged User Features
-- **Express Booking:** Special privilege to override and displace existing active bookings for specific assigned venues. Displaced student bookings are automatically moved to the waitlist.
-- **General Functions:** Ability to view slots, manage personal bookings, cancel bookings, and edit profile details similarly to normal users.
+---
 
-### 📝 New User & Guest Features
-- **Account Registration:** Register for a new account by providing student details, requesting a Normal or Privileged role (with specific facility privileges).
-- **Registration Status Tracking:** Check the status of an submitted registration (Pending, Approved, Rejected, or Suspended).
+## Features
+
+### Core Capabilities
+
+**Facility Management**
+- Search, create, and update venue information
+- Manage venue capacity and operational status (Active, Blocked, Maintenance)
+- Real-time availability tracking across all facilities
+
+**Booking System**
+- Overlap-free booking with automatic conflict detection
+- Intelligent waitlist management with automatic promotion
+- Flexible booking status tracking (Active, Waitlisted, Cancelled, Completed, Forfeited)
+
+**User Management**
+- Multi-tier registration system with role-based access
+- Admin approval workflow for new registrations
+- User profile management and credential updates
+
+**Reporting & Analytics**
+- Venue utilization summaries
+- Booking status breakdowns
+- Peak time analysis
+- User activity reports
+- Historical action logs
+
+---
+
+## User Roles
+
+### 👨‍💼 Administrator
+- Full venue management (create, update, delete, search)
+- Registration approval and user management
+- Booking oversight with manual status override
+- Waitlist monitoring and promotion
+- Comprehensive system reporting
+
+### 🎓 Normal Student
+- Book available facility slots
+- Join waitlists for occupied slots
+- View venue availability across the system
+- Manage personal bookings and booking history
+- Cancel bookings (with automatic waitlist promotion)
+- Update account credentials
+
+### ⭐ Privileged User
+- **Express booking** with override privileges on assigned venues
+- Displace existing active bookings when necessary (displaced users auto-promoted to waitlist)
+- Standard booking and profile management features
+- View and manage personal bookings
+
+### 🆕 New User / Guest
+- Self-registration with student details
+- Request Normal or Privileged role assignment
+- Track registration status (Pending, Approved, Rejected, Suspended)
+- Access to public venue information
+
+---
+
+## Data Structures & Algorithms
+
+This system uses custom Abstract Data Types (ADTs) extending a **LinkedDeque** base, each implementing optimized sorting algorithms for specific use cases.
+
+### ADT Overview
+
+| ADT | Element Type | Sorting Algorithm | Complexity | Primary Use |
+|-----|--------------|-------------------|-----------|-------------|
+| **UserDQ** | User | Merge Sort | O(n log n) | Admin user list sorting (by ID, Name, Role, Status) |
+| **VenueDQ** | Venue | Quick Sort | O(n log n) avg | Venue management and capacity reports |
+| **BookingDQ** | Booking | Heap Sort | O(n log n) | Chronological booking history (ascending/descending) |
+| **SorterDQ** | String[] | Merge Sort | O(n log n) | Report generation (active users, peak times) |
+
+### Algorithm Rationale
+
+**Merge Sort (UserDQ & SorterDQ)**
+- Guarantees O(n log n) worst-case performance
+- Maintains stability for consistent user record ordering
+- Ideal for multi-criteria sorting in admin interfaces
+
+**Quick Sort (VenueDQ)**
+- Space-efficient in-place sorting
+- Fast average-case performance for venue data
+- Optimal for memory-constrained operations
+
+**Heap Sort (BookingDQ)**
+- Consistent O(n log n) performance
+- In-place sorting without extra memory overhead
+- Supports flexible ascending/descending chronological views
+
+### Core Architecture
+
+- **Foundation:** LinkedDeque<T> — doubly-linked list with O(1) head/tail operations
+- **Validation:** Centralized ValidationUtils ensuring type safety, format correctness, and logical constraints
+- **Design Pattern:** Inheritance-based specialization for domain-specific sorting behaviors
+
+---
+
+## Technical Stack
+
+- **Language:** Java
+- **Data Structure:** Custom LinkedDeque implementation with specialized extensions
+- **Architecture:** Multi-tier role-based access control
+- **Validation:** Comprehensive input validation and constraint checking
+
+---
+
+## Project Structure
+
+```
+TARUMT-Facilities-Booking-Services/
+├── src/
+│   ├── adt/                    # Custom ADT implementations
+│   │   ├── LinkedDeque.java
+│   │   ├── UserDQ.java
+│   │   ├── VenueDQ.java
+│   │   ├── BookingDQ.java
+│   │   └── SorterDQ.java
+│   ├── model/                  # Domain models
+│   │   ├── User.java
+│   │   ├── Venue.java
+│   │   └── Booking.java
+│   ├── service/                # Business logic
+│   │   ├── BookingService.java
+│   │   ├── VenueService.java
+│   │   └── UserService.java
+│   ├── utils/
+│   │   └── ValidationUtils.java
+│   └── ui/                     # User interfaces
+│       ├── AdminPanel.java
+│       ├── StudentPanel.java
+│       └── RegistrationPanel.java
+└── README.md
+```
+
+---
+
+## Getting Started
+
+1. Clone the repository
+2. Compile all Java files in the `src/` directory
+3. Run the main application entry point
+4. Log in with your credentials or register a new account
+
+---
+
+## License
+
+This project is developed as a BMCS2063 Data Structures & Algorithms assignment for TARUMT.
