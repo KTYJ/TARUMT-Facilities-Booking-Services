@@ -1,5 +1,7 @@
 package control;
 
+import utils.ValidationUtils;
+import utils.BookingUtils;
 import adt.BookingDQ;
 import adt.LinkedDeque;
 import adt.UserDQ;
@@ -13,6 +15,9 @@ import java.util.Scanner;
 
 /**
  * Student module — booking, waitlist, slot viewing.
+ * 
+ * 
+ * @author WONG KAH LOK
  */
 public class StudentModule {
 
@@ -150,7 +155,7 @@ public class StudentModule {
         }
 
         String date = ValidationUtils.readDate(sc, "Date (yyyy-MM-dd): ");
-        String[] times = selectTimeRange(bookings, vid, date, true);
+        String[] times = selectTimeRange(bookings, vid, date, true); //calls method for time range selection
         if (times == null) return;
         String start = times[0];
         String end = times[1];
@@ -281,7 +286,15 @@ public class StudentModule {
     }
 
     // ---- Helpers ----
-
+    /**
+     * Handles interactive time slot selection for a booking.
+     * 1. Checks existing bookings for the date/venue to identify busy slots.
+     * 2. Prompts user for a start time (8 AM - 6 PM).
+     * 3. Prompts user for an end time (max 2 hours from start).
+     * 4. If not a waitlist booking, prevents selecting slots that overlap with existing bookings.
+     * 
+     * @return String array [startTime, endTime] or null if no slots available.
+     */
     private String[] selectTimeRange(BookingDQ<Booking> bookings, String vid, String date, boolean isWaitlist) {
         boolean[] slotBooked = new boolean[20]; 
         for (Booking b : bookings) {

@@ -1,5 +1,7 @@
 package control;
 
+import utils.ValidationUtils;
+import utils.BookingUtils;
 import adt.BookingDQ;
 import adt.LinkedDeque;
 import adt.UserDQ;
@@ -13,6 +15,7 @@ import java.util.Scanner;
 
 /**
  * Privileged-user module — express booking on assigned venues.
+ * @author HENG TIAN LI
  */
 public class PrivilegedModule {
 

@@ -1,5 +1,6 @@
 package control;
 
+import utils.ValidationUtils;
 import adt.LinkedDeque;
 import adt.VenueDQ;
 import dao.RegistrationDatabase;
@@ -11,7 +12,11 @@ import java.util.Scanner;
 
 /**
  * Register module — new user registration (sent to Admin for approval).
- */
+
+ *
+ * @author CHEN XIANG HUI 
+
+*/
 public class RegisterModule {
 
     private final Scanner sc;
@@ -99,7 +104,7 @@ public class RegisterModule {
         System.out.println("\n========== SEARCH REGISTRATION/USER STATUS ==========");
         String studentId = ValidationUtils.readNonBlankString(sc, "Enter Student ID (e.g. 21WMR12345): ");
         
-        // Find in registrations
+        // Find in registrations - O(n) Search
         LinkedDeque<Registration> registrations = RegistrationDatabase.loadRegistrations();
         Registration reg = null;
         for (Registration r : registrations) {
@@ -137,7 +142,7 @@ public class RegisterModule {
                 System.out.println("Your registration has been rejected, please contact DSA for more info");
                 break;
             case "SUSPENDED":
-                System.out.println("Your account is suspended");
+                System.out.println("Your account is suspended. Please contact DSA for more info");
                 break;
         }
     }

@@ -77,8 +77,8 @@ public class Main {
      * Simple admin login — hardcoded check against users.txt
      */
     private static void adminLogin(Scanner sc) {
-        String id = control.ValidationUtils.readUserId(sc, "Admin ID: ");
-        String pw = control.ValidationUtils.readNonBlankString(sc, "Password: ");
+        String id = utils.ValidationUtils.readUserId(sc, "Admin ID: ");
+        String pw = utils.ValidationUtils.readNonBlankString(sc, "Password: ");
 
         UserDQ users = UserDatabase.loadUsers();
         User u = (User) users.find(id);
@@ -104,6 +104,6 @@ public class Main {
     }
     
     private static int readInt(Scanner sc, String prompt) {
-        return control.ValidationUtils.readInt(sc, prompt);
+        return utils.ValidationUtils.readInt(sc, prompt);
     }
 }

@@ -1,4 +1,4 @@
-package control;
+package utils;
 
 import adt.BookingDQ;
 import dao.BookingDatabase;

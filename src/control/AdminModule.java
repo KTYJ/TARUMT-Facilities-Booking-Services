@@ -5,6 +5,8 @@
 
 package control;
 
+import utils.ValidationUtils;
+import utils.BookingUtils;
 import adt.BookingDQ;
 import adt.LinkedDeque;
 import adt.SorterDQ;
@@ -18,6 +20,8 @@ import model.*;
 
 /**
  * Admin module — all administrative operations.
+ * 
+ * @author TAN JIN YUAN KTYJ
  */
 public class AdminModule {
 
