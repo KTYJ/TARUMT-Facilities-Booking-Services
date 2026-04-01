@@ -1,133 +1,137 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
-/**
- *
- * @author KTYJ
- */
-import adt.BookingDQ;
-import adt.LinkedDeque;
 import java.time.LocalDateTime;
+import model.status.BookingStatus;
 
-public class Booking {
+/**
+ * Represents a facility booking or waitlist entry.
+ * Waitlisted bookings have status = WAITING.
+ */
+public class Booking implements Comparable<Booking> {
 
     private String bookingId;
-    private String headUserId;
+    private String userId;
     private String venueId;
-
-    private LocalDateTime slotStartDateTime;
-    private LocalDateTime slotEndDateTime;
-
-    private LinkedDeque<BookingParticipant> participants;
+    private String date; // e.g. "2026-03-25"
+    private String startTime; // e.g. "09:00"
+    private String endTime; // e.g. "11:00"
     private BookingStatus bookingStatus;
 
-    // queue of waiting teams for the same slot
-    private BookingDQ<Booking> waitingQueue;
-
     public Booking() {
-        participants = new LinkedDeque<>();
-        waitingQueue = new BookingDQ<>();
-        bookingStatus = BookingStatus.ACTIVE;
+        this.bookingStatus = BookingStatus.ACTIVE;
     }
 
-    public Booking(String bookingId, String headUserId, String venueId,
-            LocalDateTime slotStartDateTime, LocalDateTime slotEndDateTime,
-            LinkedDeque<BookingParticipant> participants,
+    public Booking(String bookingId, String userId, String venueId,
+            String date, String startTime, String endTime,
             BookingStatus bookingStatus) {
         this.bookingId = bookingId;
-        this.headUserId = headUserId;
+        this.userId = userId;
         this.venueId = venueId;
-        this.slotStartDateTime = slotStartDateTime;
-        this.slotEndDateTime = slotEndDateTime;
-        this.participants = participants;
+        this.date = date;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.bookingStatus = bookingStatus;
-        this.waitingQueue = new BookingDQ<>();
     }
 
+    // ---- Getters ----
     public String getBookingId() {
         return bookingId;
     }
 
-    public String getHeadUserId() {
-        return headUserId;
+    public String getUserId() {
+        return userId;
     }
 
     public String getVenueId() {
         return venueId;
     }
 
-    public LocalDateTime getSlotStartDateTime() {
-        return slotStartDateTime;
+    public String getDate() {
+        return date;
     }
 
-    public LocalDateTime getSlotEndDateTime() {
-        return slotEndDateTime;
+    public String getStartTime() {
+        return startTime;
     }
 
-    public LinkedDeque<BookingParticipant> getParticipants() {
-        return participants;
+    public String getEndTime() {
+        return endTime;
     }
 
     public BookingStatus getBookingStatus() {
         return bookingStatus;
     }
 
-    public BookingDQ<Booking> getWaitingQueue() {
-        return waitingQueue;
-    }
-
+    // ---- Setters ----
     public void setBookingId(String bookingId) {
         this.bookingId = bookingId;
     }
 
-    public void setHeadUserId(String headUserId) {
-        this.headUserId = headUserId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public void setVenueId(String venueId) {
         this.venueId = venueId;
     }
 
-    public void setSlotStartDateTime(LocalDateTime slotStartDateTime) {
-        this.slotStartDateTime = slotStartDateTime;
+    public void setDate(String date) {
+        this.date = date;
     }
 
-    public void setSlotEndDateTime(LocalDateTime slotEndDateTime) {
-        this.slotEndDateTime = slotEndDateTime;
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
     }
 
-    public void setParticipants(LinkedDeque<BookingParticipant> participants) {
-        this.participants = participants;
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
     }
 
     public void setBookingStatus(BookingStatus bookingStatus) {
         this.bookingStatus = bookingStatus;
     }
 
-    public boolean isSameSlot(String venueId, LocalDateTime start, LocalDateTime end) {
+    /** Checks if this booking occupies the same slot. */
+    public boolean isSameSlot(String venueId, String date, String startTime, String endTime) {
         return this.venueId.equals(venueId)
-                && this.slotStartDateTime.equals(start)
-                && this.slotEndDateTime.equals(end);
-    }
-
-    public int getParticipantCount() {
-        return participants.size();
+                && this.date.equals(date)
+                && this.startTime.equals(startTime)
+                && this.endTime.equals(endTime);
     }
 
     @Override
     public String toString() {
-        return "Booking{"
-                + "bookingId='" + bookingId + '\''
-                + ", headUserId='" + headUserId + '\''
-                + ", venueId='" + venueId + '\''
-                + ", slotStartDateTime=" + slotStartDateTime
-                + ", slotEndDateTime=" + slotEndDateTime
-                + ", participantCount=" + participants.size()
-                + ", bookingStatus=" + bookingStatus
-                + ", waitingQueueSize=" + waitingQueue.size()
-                + '}';
+        return String.format("| %-9s | %-10s | %-7s | %-10s | %s-%s | %-9s |",
+                bookingId, userId, venueId, date, startTime, endTime, bookingStatus);
+    }
+
+    /** CSV: bookingId,userId,venueId,date,startTime,endTime,status */
+    public String toFileString() {
+        return bookingId + "," + userId + "," + venueId + ","
+                + date + "," + startTime + "," + endTime + ","
+                + bookingStatus;
+    }
+
+    public static Booking fromFileString(String line) {
+        String[] p = line.split(",");
+        if (p.length != 7)
+            return null;
+        return new Booking(p[0], p[1], p[2], p[3], p[4], p[5],
+                BookingStatus.valueOf(p[6].trim()));
+    }
+
+    public LocalDateTime getEndDateTime() {
+        return LocalDateTime.parse(date + "T" + endTime);
+    }
+
+    @Override
+    public int compareTo(Booking other) {
+        /*
+        return value:
+        - < 0 : this.booking is earlier than other.booking
+        - > 0  : this.booking is later than other.booking
+        - = 0 : this.booking is same as other.booking
+        */
+        return this.getEndDateTime().compareTo(other.getEndDateTime());
     }
 }

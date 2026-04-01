@@ -1,8 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package control;
+package dao;
 
 import adt.VenueDQ;
 import java.io.BufferedReader;
@@ -12,43 +8,39 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import model.Venue;
+
 /**
- *
- * @author User
+ * File-based CRUD for Venue entities.
+ * File: venues.txt (CSV, one row per venue).
  */
 public class VenueDatabase {
 
     private static final String FILE_NAME = "venues.txt";
 
     public static VenueDQ<Venue> loadVenues() {
-        VenueDQ<Venue> venueList = new VenueDQ<>();
+        VenueDQ<Venue> venues = new VenueDQ<>();
         File file = new File(FILE_NAME);
-
-        if (!file.exists()) {
-            return venueList;
-        }
+        if (!file.exists()) return venues;
 
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
-
             while ((line = br.readLine()) != null) {
                 if (!line.trim().isEmpty()) {
                     Venue venue = Venue.fromFileString(line);
                     if (venue != null) {
-                        venueList.addLast(venue);
+                        venues.addLast(venue);
                     }
                 }
             }
         } catch (IOException e) {
             System.out.println("Error loading venues: " + e.getMessage());
         }
-
-        return venueList;
+        return venues;
     }
 
-    public static void saveVenues(VenueDQ<Venue> venueList) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_NAME))) {
-            for (Venue venue : venueList) {
+    public static void saveVenues(VenueDQ<Venue> venues) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_NAME, false))) {
+            for (Venue venue : venues) {
                 bw.write(venue.toFileString());
                 bw.newLine();
             }
