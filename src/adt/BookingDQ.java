@@ -48,7 +48,7 @@ public class BookingDQ<T> extends LinkedDeque<T>{
          * If ascending is true, builds a max-heap (largest bubbles up, resulting in ascending array).
          * If ascending is false, builds a min-heap (smallest bubbles up, resulting in descending array).
          */
-        @SuppressWarnings("unchecked")
+        // @SuppressWarnings("unchecked")
         private void heapify(Node<T>[] arr, int n, int i) {
             int target = i;
             int left = 2 * i + 1;
