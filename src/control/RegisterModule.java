@@ -23,7 +23,10 @@ public class RegisterModule {
     public void run() {
         System.out.println("\n===== NEW USER REGISTRATION =====");
 
-        String name = ValidationUtils.readNonBlankString(sc, "Full Name: ");
+        String name = ValidationUtils.readNonBlankString(sc, "Full Name (press Q to exit): ");
+        if (name.equalsIgnoreCase("Q")) {
+            return;
+        }
         String id = ValidationUtils.readStudentId(sc, "Student ID (e.g. 21WMR12345): ");
         String message = ValidationUtils.readNonBlankString(sc, "Usage / Request Message: ");
 

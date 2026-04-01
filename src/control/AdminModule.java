@@ -11,11 +11,10 @@ import adt.SorterDQ;
 import adt.UserDQ;
 import adt.VenueDQ;
 import dao.*;
-import model.*;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
+import model.*;
 
 /**
  * Admin module — all administrative operations.
@@ -71,7 +70,20 @@ public class AdminModule {
 
     private void createVenue() {
         VenueDQ<Venue> venues = VenueDatabase.loadVenues();
-        String id = ValidationUtils.readNonBlankString(sc, "Venue ID: ");
+        String id;
+        
+        while (true) {
+            id = ValidationUtils.readNonBlankString(sc, "Venue ID ([Letter]+4 digits, e.g., V0001) <press Q to exit>: ");
+            if (id.equalsIgnoreCase("Q")) {
+                return;
+            }
+            else if (Venue.isValidVenueId(id)) {
+                break;
+            } else {
+                System.out.println("Wrong venue format, please try with [Letter]+4 digits");
+            }
+        }
+        
         if (venues.find(id) != null) {
             System.out.println("Venue ID already exists!");
             return;

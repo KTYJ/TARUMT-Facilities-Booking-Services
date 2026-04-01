@@ -13,68 +13,82 @@ public class Venue {
     private String venueName;
     private VenueStatus status;
     private int capacity;
-    
-    public Venue(){
+
+    public Venue() {
     }
-    
+
     public Venue(String venueId, String venueName, VenueStatus status, int capacity) {
         this.venueId = venueId;
         this.venueName = venueName;
         this.status = status;
         this.capacity = capacity;
     }
-    
-    public Venue(String venueId, String venueName, int capacity){
+
+    public Venue(String venueId, String venueName, int capacity) {
         this.venueId = venueId;
         this.venueName = venueName;
-        this.status = VenueStatus.AVAILABLE; //default available
+        this.status = VenueStatus.AVAILABLE; // default available
         this.capacity = capacity;
     }
-    
+
     public String getVenueId() {
         return venueId;
     }
-    
-    public String getVenueName(){
+
+    public String getVenueName() {
         return venueName;
     }
-    
+
+    public static boolean isValidVenueId(String id) {
+        if (id == null || id.length() != 5) {
+            return false;
+        }
+        if (!Character.isLetter(id.charAt(0))) {
+            return false;
+        }
+        for (int i = 1; i < 5; i++) {
+            if (!Character.isDigit(id.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public VenueStatus getStatus() {
         return status;
     }
-    
-    public int getCapacity(){
+
+    public int getCapacity() {
         return capacity;
     }
-    
-    public void setVenueId(String venueId){
+
+    public void setVenueId(String venueId) {
         this.venueId = venueId;
     }
-    
-    public void setVenueName(String venueName){
+
+    public void setVenueName(String venueName) {
         this.venueName = venueName;
     }
-    
-    public void setStatus(VenueStatus status){
+
+    public void setStatus(VenueStatus status) {
         this.status = status;
     }
-    
-    public void setCapacity(int capacity){
+
+    public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
-    
-    public boolean isAvailable(){
+
+    public boolean isAvailable() {
         return status == VenueStatus.AVAILABLE;
     }
-    
-        @Override
+
+    @Override
     public String toString() {
-        return venueId + " - " + venueName + 
-        " [" + status + 
-        " | Max: " + capacity + "]";
+        return venueId + " - " + venueName +
+                " [" + status +
+                " | Max: " + capacity + "]";
     }
 
-    
     public String toFileString() {
         return venueId + ","
                 + venueName + ","
