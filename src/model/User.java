@@ -1,5 +1,8 @@
 package model;
 
+import model.status.UserRole;
+import model.status.UserStatus;
+
 /**
  * Represents any user in the system (Student, Privileged, or Admin).
  * Role is determined by the UserRole enum; no subclasses needed.

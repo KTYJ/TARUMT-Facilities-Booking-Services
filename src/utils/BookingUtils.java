@@ -3,7 +3,7 @@ package utils;
 import adt.BookingDQ;
 import dao.BookingDatabase;
 import model.Booking;
-import model.BookingStatus;
+import model.status.BookingStatus;
 
 public class BookingUtils {
 

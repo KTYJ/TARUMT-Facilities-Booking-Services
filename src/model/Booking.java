@@ -1,17 +1,20 @@
 package model;
 
+import java.time.LocalDateTime;
+import model.status.BookingStatus;
+
 /**
  * Represents a facility booking or waitlist entry.
  * Waitlisted bookings have status = WAITING.
  */
-public class Booking {
+public class Booking implements Comparable<Booking> {
 
     private String bookingId;
     private String userId;
     private String venueId;
-    private String date;       // e.g. "2026-03-25"
-    private String startTime;  // e.g. "09:00"
-    private String endTime;    // e.g. "11:00"
+    private String date; // e.g. "2026-03-25"
+    private String startTime; // e.g. "09:00"
+    private String endTime; // e.g. "11:00"
     private BookingStatus bookingStatus;
 
     public Booking() {
@@ -19,8 +22,8 @@ public class Booking {
     }
 
     public Booking(String bookingId, String userId, String venueId,
-                   String date, String startTime, String endTime,
-                   BookingStatus bookingStatus) {
+            String date, String startTime, String endTime,
+            BookingStatus bookingStatus) {
         this.bookingId = bookingId;
         this.userId = userId;
         this.venueId = venueId;
@@ -31,22 +34,62 @@ public class Booking {
     }
 
     // ---- Getters ----
-    public String getBookingId()          { return bookingId; }
-    public String getUserId()             { return userId; }
-    public String getVenueId()            { return venueId; }
-    public String getDate()               { return date; }
-    public String getStartTime()          { return startTime; }
-    public String getEndTime()            { return endTime; }
-    public BookingStatus getBookingStatus() { return bookingStatus; }
+    public String getBookingId() {
+        return bookingId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public String getVenueId() {
+        return venueId;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public BookingStatus getBookingStatus() {
+        return bookingStatus;
+    }
 
     // ---- Setters ----
-    public void setBookingId(String bookingId)              { this.bookingId = bookingId; }
-    public void setUserId(String userId)                    { this.userId = userId; }
-    public void setVenueId(String venueId)                  { this.venueId = venueId; }
-    public void setDate(String date)                        { this.date = date; }
-    public void setStartTime(String startTime)              { this.startTime = startTime; }
-    public void setEndTime(String endTime)                  { this.endTime = endTime; }
-    public void setBookingStatus(BookingStatus bookingStatus) { this.bookingStatus = bookingStatus; }
+    public void setBookingId(String bookingId) {
+        this.bookingId = bookingId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public void setVenueId(String venueId) {
+        this.venueId = venueId;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
+
+    public void setBookingStatus(BookingStatus bookingStatus) {
+        this.bookingStatus = bookingStatus;
+    }
 
     /** Checks if this booking occupies the same slot. */
     public boolean isSameSlot(String venueId, String date, String startTime, String endTime) {
@@ -71,8 +114,24 @@ public class Booking {
 
     public static Booking fromFileString(String line) {
         String[] p = line.split(",");
-        if (p.length != 7) return null;
+        if (p.length != 7)
+            return null;
         return new Booking(p[0], p[1], p[2], p[3], p[4], p[5],
                 BookingStatus.valueOf(p[6].trim()));
+    }
+
+    public LocalDateTime getEndDateTime() {
+        return LocalDateTime.parse(date + "T" + endTime);
+    }
+
+    @Override
+    public int compareTo(Booking other) {
+        /*
+        return value:
+        - < 0 : this.booking is earlier than other.booking
+        - > 0  : this.booking is later than other.booking
+        - = 0 : this.booking is same as other.booking
+        */
+        return this.getEndDateTime().compareTo(other.getEndDateTime());
     }
 }

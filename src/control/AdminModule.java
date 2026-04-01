@@ -5,6 +5,11 @@
 
 package control;
 
+import model.status.UserRole;
+import model.status.BookingStatus;
+import model.Booking;
+import model.status.UserStatus;
+import model.status.VenueStatus;
 import utils.ValidationUtils;
 import utils.BookingUtils;
 import adt.BookingDQ;
@@ -36,19 +41,45 @@ public class AdminModule {
         int choice;
         do {
             System.out.println("\n========= ADMIN PANEL =========");
+            System.out.println(" 1. Venue Management");
+            System.out.println(" 2. Accept Registrations");
+            System.out.println(" 3. Waitlist Management");
+            System.out.println(" 4. Slots View");
+            System.out.println(" 5. Update Bookings");
+            System.out.println(" 6. Reports");
+            System.out.println(" 7. Registered User Lists");
+            System.out.println(" 8. Edit User Details");
+            System.out.println(" 0. Logout");
+            System.out.println("================================");
+            System.out.print("Choice: ");
+            choice = readInt();
+
+            switch (choice) {
+                case 1 -> venueManagement();
+                case 2 -> acceptRegistrations();
+                case 3 -> waitlistManagement();
+                case 4 -> slotsView();
+                case 5 -> manageBookings();
+                case 6 -> reports();
+                case 7 -> registeredUserLists();
+                case 8 -> editUserDetails();
+                case 0 -> System.out.println("Logging out...");
+                default -> System.out.println("Invalid choice.");
+            }
+        } while (choice != 0);
+    }
+
+    private void venueManagement() {
+        int choice;
+        do {
+            System.out.println("\n===== VENUE MANAGEMENT =====");
             System.out.println(" 1. Create Venue");
             System.out.println(" 2. Update / Block Venue");
             System.out.println(" 3. Remove Venue");
             System.out.println(" 4. Search Venue");
-            System.out.println(" 5. Accept Registrations");
-            System.out.println(" 6. Waitlist Management");
-            System.out.println(" 7. Slots View");
-            System.out.println(" 8. Manage Bookings");
-            System.out.println(" 9. Reports");
-            System.out.println("10. Registered User Lists");
-            System.out.println("11. Edit User Details");
-            System.out.println(" 0. Logout");
-            System.out.println("================================");
+            System.out.println(" 5. View All Venues");
+            System.out.println(" 0. Back to Admin Panel");
+            System.out.println("-------------------------");
             System.out.print("Choice: ");
             choice = readInt();
 
@@ -57,14 +88,8 @@ public class AdminModule {
                 case 2 -> updateVenue();
                 case 3 -> removeVenue();
                 case 4 -> searchVenue();
-                case 5 -> acceptRegistrations();
-                case 6 -> waitlistManagement();
-                case 7 -> slotsView();
-                case 8 -> manageBookings();
-                case 9 -> reports();
-                case 10 -> registeredUserLists();
-                case 11 -> editUserDetails();
-                case 0 -> System.out.println("Logging out...");
+                case 5 -> viewVenues();
+                case 0 -> System.out.println("Returning to admin panel...");
                 default -> System.out.println("Invalid choice.");
             }
         } while (choice != 0);
@@ -75,19 +100,19 @@ public class AdminModule {
     private void createVenue() {
         VenueDQ<Venue> venues = VenueDatabase.loadVenues();
         String id;
-        
+
         while (true) {
-            id = ValidationUtils.readNonBlankString(sc, "Venue ID ([Letter]+4 digits, e.g., V0001) <press Q to exit>: ");
+            id = ValidationUtils.readNonBlankString(sc,
+                    "Venue ID ([Letter]+4 digits, e.g., V0001) <press Q to exit>: ");
             if (id.equalsIgnoreCase("Q")) {
                 return;
-            }
-            else if (Venue.isValidVenueId(id)) {
+            } else if (Venue.isValidVenueId(id)) {
                 break;
             } else {
                 System.out.println("Wrong venue format, please try with [Letter]+4 digits");
             }
         }
-        
+
         if (venues.find(id) != null) {
             System.out.println("Venue ID already exists!");
             return;
@@ -237,6 +262,41 @@ public class AdminModule {
         }
     }
 
+    private void viewVenues() {
+        VenueDQ<Venue> venues = VenueDatabase.loadVenues();
+        if (venues.isEmpty()) {
+            System.out.println("\nNo venues registered yet.");
+            return;
+        }
+        int opt;
+        String crit = "Capacity"; //default
+        do {
+            venues.sortBy(crit);
+            if (crit != null) {
+                System.out.println("\n>> Successfully sorted by " + crit + ".");
+            }
+            System.out.println("\n--- All Venues ---");
+            System.out.printf("%-15s %-30s %-10s %-15s%n", "ID", "Name", "Capacity", "Status");
+            System.out.println("-".repeat(75));
+
+            for (Venue v : venues) {
+                System.out.printf("%-15s %-30s %-10d %-15s%n",
+                        v.getVenueId(), v.getVenueName(), v.getCapacity(), v.getStatus());
+            }
+            System.out.print("Sort by...\n1. Name\n2. Capacity\n3. Status\n0. Back\nChoice: ");
+            opt = readInt();
+
+            if (opt == 1) {
+                crit = "Name";
+            } else if (opt == 2) {
+                crit = "Capacity";
+            } else if (opt == 3) {
+                crit = "Status";
+            }
+            
+        } while (opt != 0);
+    }
+
     // ------------------------------------------------------------------
     // Registrations
 
@@ -349,16 +409,21 @@ public class AdminModule {
                     "BookingID", "Date", "Time", "User", "Status");
             System.out.println("  " + "-".repeat(60));
             boolean hasBooking = false;
+            BookingDQ<Booking> tempBDQ = new BookingDQ<>();
             for (Booking b : bookings) {
-                if (b.getVenueId().equals(v.getVenueId())) {
-                    System.out.printf("  %-12s %-10s %-10s %-15s %-10s%n",
-                            b.getBookingId(), b.getDate(),
-                            b.getStartTime() + "-" + b.getEndTime(),
-                            b.getUserId(), b.getBookingStatus());
+                if (b.getVenueId().equals(v.getVenueId())
+                        && (b.getBookingStatus() == BookingStatus.ACTIVE
+                                || b.getBookingStatus() == BookingStatus.WAITING)) {
+                    tempBDQ.addLast(b);
                     hasBooking = true;
                 }
             }
-            if (!hasBooking)
+            if (hasBooking) {
+                tempBDQ.sortByDateTime(false);
+                for (Booking b : tempBDQ) {
+                    System.out.println("  " + b);
+                }
+            } else
                 System.out.println("  (no bookings)");
         }
     }
@@ -374,10 +439,11 @@ public class AdminModule {
         }
 
         System.out.println("\n--- All Bookings ---");
+        bookings.sortByDateTime(false);
         for (Booking b : bookings) {
-            System.out.println("  [" + b.getBookingId() + "] by " + b.getUserId() +
-                    " for " + b.getVenueId() +
-                    " (" + b.getDate() + " " + b.getStartTime() + "-" + b.getEndTime() + "), Status: "
+            System.out.println("  [" + b.getBookingId() + "] - " + b.getUserId() +
+                    " - " + b.getVenueId() +
+                    " (" + b.getDate() + " " + b.getStartTime() + "-" + b.getEndTime() + ") Status: "
                     + b.getBookingStatus());
         }
 
@@ -451,7 +517,7 @@ public class AdminModule {
             System.out.println("0. Back");
             System.out.print("Choice: ");
             opt = readInt();
-            if(opt < 0 || opt > 5){
+            if (opt < 0 || opt > 5) {
                 System.out.println("Invalid choice. Please try again.");
                 continue;
             }
@@ -505,59 +571,13 @@ public class AdminModule {
         System.out.println("Total     : " + bookings.size());
     }
 
-    // private void reportActiveUsers(BookingDQ<Booking> bookings, UserDQ users) {
-    //     System.out.println("\n--- Most Active Users (by booking count) ---");
-    //     LinkedDeque<String> countedIds = new LinkedDeque<>();
-    //     LinkedDeque<Integer> counts = new LinkedDeque<>();
-
-    //     for (Booking b : bookings) {
-    //         String uid = b.getUserId();
-    //         boolean found = false;
-    //         // Walk both deques in parallel using iterators
-    //         Iterator<String> idIt = countedIds.iterator();
-    //         Iterator<Integer> cntIt = counts.iterator();
-    //         LinkedDeque<String> newIds = new LinkedDeque<>();
-    //         LinkedDeque<Integer> newCnts = new LinkedDeque<>();
-
-    //         while (idIt.hasNext()) {
-    //             String existId = idIt.next();
-    //             int existCnt = cntIt.next();
-    //             if (existId.equals(uid)) {
-    //                 existCnt++;
-    //                 found = true;
-    //             }
-    //             newIds.addLast(existId);
-    //             newCnts.addLast(existCnt);
-    //         }
-    //         if (!found) {
-    //             newIds.addLast(uid);
-    //             newCnts.addLast(1);
-    //         }
-    //         countedIds = newIds;
-    //         counts = newCnts;
-    //     }
-
-    //     // Print
-    //     System.out.printf("%-15s %-20s %-10s%n", "User ID", "Name", "Bookings");
-    //     System.out.println("-".repeat(45));
-    //     Iterator<String> idIt = countedIds.iterator();
-    //     Iterator<Integer> cntIt = counts.iterator();
-    //     while (idIt.hasNext()) {
-    //         String uid = idIt.next();
-    //         int cnt = cntIt.next();
-    //         User u = (User) users.find(uid);
-    //         String uname = (u != null) ? u.getName() : "Unknown";
-    //         System.out.printf("%-15s %-20s %-10d%n", uid, uname, cnt);
-    //     }
-    // }
-
     private void reportActiveUsers(BookingDQ<Booking> bookings, UserDQ users) {
-        SorterDQ sorterDQ = new SorterDQ();   // rows: [userId, name, count]
+        SorterDQ sorterDQ = new SorterDQ(); // rows: [userId, name, count]
 
         for (Booking b : bookings) {
             String uid = b.getUserId();
             boolean found = false;
-            //if found, increment count
+            // if found, increment count
             for (String[] row : sorterDQ) {
                 if (row[0].equals(uid)) {
                     row[2] = String.valueOf(Integer.parseInt(row[2]) + 1);
@@ -569,12 +589,12 @@ public class AdminModule {
             if (!found) {
                 User u = users.find(uid);
                 String uname = (u != null) ? u.getName() : "Unknown";
-                sorterDQ.addLast(new String[]{uid, uname, "1"});
+                sorterDQ.addLast(new String[] { uid, uname, "1" });
             }
         }
 
         // ── 2. Sort descending by booking count (last element) ────────────────────
-        sorterDQ.sort(true);   // true = descending (most active first)
+        sorterDQ.sort(true); // true = descending (most active first)
 
         // ── 3. Print ──────────────────────────────────────────────────────────────
         System.out.println("\n--- Most Active Users (by booking count) ---");
@@ -584,54 +604,13 @@ public class AdminModule {
             System.out.printf("%-15s %-20s %-10s%n", row[0], row[1], row[2]);
         }
     }
-    
-    // private void reportPeakTime(BookingDQ<Booking> bookings) {
-    //     System.out.println("\n--- Peak Time Analysis (by start hour) ---");
-    //     // Count bookings per start-time hour
-    //     LinkedDeque<String> hours = new LinkedDeque<>();
-    //     LinkedDeque<Integer> counts = new LinkedDeque<>();
-
-    //     for (Booking b : bookings) {
-    //         String hour = b.getStartTime(); // e.g. "09:00"
-    //         boolean found = false;
-    //         Iterator<String> hIt = hours.iterator();
-    //         Iterator<Integer> cIt = counts.iterator();
-    //         LinkedDeque<String> newH = new LinkedDeque<>();
-    //         LinkedDeque<Integer> newC = new LinkedDeque<>();
-
-    //         while (hIt.hasNext()) {
-    //             String eh = hIt.next();
-    //             int ec = cIt.next();
-    //             if (eh.equals(hour)) {
-    //                 ec++;
-    //                 found = true;
-    //             }
-    //             newH.addLast(eh);
-    //             newC.addLast(ec);
-    //         }
-    //         if (!found) {
-    //             newH.addLast(hour);
-    //             newC.addLast(1);
-    //         }
-    //         hours = newH;
-    //         counts = newC;
-    //     }
-
-    //     System.out.printf("%-10s %-10s%n", "Time", "Bookings");
-    //     System.out.println("-".repeat(20));
-    //     Iterator<String> hIt = hours.iterator();
-    //     Iterator<Integer> cIt = counts.iterator();
-    //     while (hIt.hasNext()) {
-    //         System.out.printf("%-10s %-10d%n", hIt.next(), cIt.next());
-    //     }
-    // }
 
     private void reportPeakTime(BookingDQ<Booking> bookings) {
         // ── 1. Tally bookings per start-time slot ─────────────────────────────────
-        SorterDQ sorterDQ = new SorterDQ();   // rows: [hour, count]
+        SorterDQ sorterDQ = new SorterDQ(); // rows: [hour, count]
 
         for (Booking b : bookings) {
-            String hour = b.getStartTime();   // e.g. "09:00"
+            String hour = b.getStartTime(); // e.g. "09:00"
             boolean found = false;
 
             for (String[] row : sorterDQ) {
@@ -642,12 +621,12 @@ public class AdminModule {
                 }
             }
             if (!found) {
-                sorterDQ.addLast(new String[]{hour, "1"});
+                sorterDQ.addLast(new String[] { hour, "1" });
             }
         }
 
         // ── 2. Sort descending by booking count (last element) ────────────────────
-        sorterDQ.sort(true);   // true = descending (busiest slot first)
+        sorterDQ.sort(true); // true = descending (busiest slot first)
 
         // ── 3. Print ──────────────────────────────────────────────────────────────
         System.out.println("\n--- Peak Time Analysis (by start hour) ---");

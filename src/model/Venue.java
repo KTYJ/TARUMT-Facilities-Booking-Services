@@ -4,6 +4,8 @@
  */
 package model;
 
+import model.status.VenueStatus;
+
 /**
  *
  * @author User

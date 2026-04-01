@@ -1,5 +1,9 @@
 package control;
 
+import model.status.UserRole;
+import model.status.BookingStatus;
+import model.Booking;
+import model.status.UserStatus;
 import utils.ValidationUtils;
 import utils.BookingUtils;
 import adt.BookingDQ;
@@ -31,7 +35,8 @@ public class StudentModule {
     /** Login then enter the student menu. Returns false if login fails. */
     public boolean loginAndRun() {
         currentUser = login();
-        if (currentUser == null) return false;
+        if (currentUser == null)
+            return false;
         run();
         return true;
     }
@@ -116,7 +121,8 @@ public class StudentModule {
         
         String date = ValidationUtils.readDate(sc, "Date (yyyy-MM-dd): ");
         String[] times = selectTimeRange(bookings, vid, date, false);
-        if (times == null) return;
+        if (times == null)
+            return;
         String start = times[0];
         String end = times[1];
 
@@ -155,8 +161,9 @@ public class StudentModule {
         }
 
         String date = ValidationUtils.readDate(sc, "Date (yyyy-MM-dd): ");
-        String[] times = selectTimeRange(bookings, vid, date, true); //calls method for time range selection
-        if (times == null) return;
+        String[] times = selectTimeRange(bookings, vid, date, true); // calls method for time range selection
+        if (times == null)
+            return;
         String start = times[0];
         String end = times[1];
 
@@ -181,69 +188,105 @@ public class StudentModule {
             System.out.printf("  %-12s %-12s%n", "Date", "Time");
             System.out.println("  " + "-".repeat(30));
             boolean hasBooking = false;
+            BookingDQ<Booking> tempBDQ = new BookingDQ<>();
+
             for (Booking b : bookings) {
                 if (b.getVenueId().equals(v.getVenueId())
                         && (b.getBookingStatus() == BookingStatus.ACTIVE
-                        || b.getBookingStatus() == BookingStatus.WAITING)) {
-                    System.out.printf("  %-12s %-12s%n",
-                            b.getDate(), b.getStartTime() + "-" + b.getEndTime());
+                                || b.getBookingStatus() == BookingStatus.WAITING)) {
+                    tempBDQ.addLast(b);
                     hasBooking = true;
                 }
             }
-            if (!hasBooking) System.out.println("  (all slots open)");
+            if (!hasBooking)
+                System.out.println("  (all slots open)");
+            else {
+                tempBDQ.sortByDateTime(false);
+                for (Booking b : tempBDQ) {
+                    System.out.printf("  %-12s %-12s%n",
+                            b.getDate(), b.getStartTime() + "-" + b.getEndTime());
+                }
+            }
         }
     }
 
     private void myBookings() {
-        BookingDQ<Booking> bookings = BookingDatabase.loadBookings();
-        System.out.println("\n--- My Bookings ---");
-        boolean any = false;
-        System.out.println(String.format("| %-9s | %-10s | %-7s | %-10s | %-11s | %-9s |",
-                "BookingID", "UserID", "VenueID", "Date", "Time", "Status"));
-        for (Booking b : bookings) {
+        BookingDQ<Booking> myBookings = new BookingDQ<>();
+        for (Booking b : BookingDatabase.loadBookings()) {
             if (b.getUserId().equals(currentUser.getStudentId())) {
-                System.out.println(b);
-                any = true;
+                myBookings.addFirst(b);
             }
         }
-        if (!any) System.out.println("  No bookings found.");
+
+        System.out.println("\n--- My Bookings ---");
+        if (myBookings.isEmpty()) {
+            System.out.println("  No bookings found.");
+            return;
+        }
+
+        int sortChoice = 2;
+        do {
+            if (sortChoice == 1 || sortChoice == 2) {
+                myBookings.sortByDateTime(sortChoice == 1);
+                System.out.println("Displaying bookings by " + (sortChoice == 1 ? "Ascending" : "Descending"));
+                System.out.println(String.format("| %-9s | %-7s | %-10s | %-11s | %-9s |",
+                        "BookingID", "VenueID", "Date", "Time", "Status"));
+                System.out.println("-".repeat(55));
+                for (Booking b : myBookings) {
+                    System.out.println(String.format("| %-9s | %-7s | %-10s | %-11s | %-9s |",
+                            b.getBookingId(), b.getVenueId(), b.getDate(), b.getStartTime() + "-" + b.getEndTime(),
+                            b.getBookingStatus()));
+                }
+            } else if (sortChoice != 0) {
+                System.out.println("Invalid choice. Please try again.");
+            }
+            System.out.println("\nSort by date:");
+            System.out.println("  1. Ascending  (earliest first)");
+            System.out.println("  2. Descending (latest first)");
+            System.out.println("  0. Back");
+            System.out.print("Choice: ");
+            sortChoice = readInt();
+        } while (sortChoice != 0);
     }
 
     private void cancelBooking() {
         BookingDQ<Booking> bookings = BookingDatabase.loadBookings();
         System.out.println("\n--- Cancel My Booking ---");
-        
+
         boolean found = false;
         for (Booking b : bookings) {
             if (b.getUserId().equals(currentUser.getStudentId()) && b.getBookingStatus() == BookingStatus.ACTIVE) {
-                System.out.println("  [" + b.getBookingId() + "] Venue: " + b.getVenueId() + 
-                                   " | " + b.getDate() + " (" + b.getStartTime() + "-" + b.getEndTime() + ")");
+                System.out.println("  [" + b.getBookingId() + "] Venue: " + b.getVenueId() +
+                        " | " + b.getDate() + " (" + b.getStartTime() + "-" + b.getEndTime() + ")");
                 found = true;
             }
         }
-        
+
         if (!found) {
             System.out.println("No active bookings available to cancel.");
             return;
         }
 
         String bid = ValidationUtils.readNonBlankString(sc, "\nEnter Booking ID to cancel (or 'back'): ");
-        if ("back".equalsIgnoreCase(bid)) return;
+        if ("back".equalsIgnoreCase(bid))
+            return;
 
         Booking target = (Booking) bookings.find(bid);
-        if (target == null || !target.getUserId().equals(currentUser.getStudentId()) || target.getBookingStatus() != BookingStatus.ACTIVE) {
+        if (target == null || !target.getUserId().equals(currentUser.getStudentId())
+                || target.getBookingStatus() != BookingStatus.ACTIVE) {
             System.out.println("Invalid Booking ID or booking is not active.");
             return;
         }
-        
+
         System.out.print("Are you sure you want to cancel " + bid + "? (Y/N): ");
         String confirm = sc.nextLine().trim();
         if (confirm.equalsIgnoreCase("y")) {
             target.setBookingStatus(BookingStatus.CANCELLED);
             BookingDatabase.saveBookings(bookings);
-            logHistory("BOOKING_CANCELLED", currentUser.getStudentId(), target.getVenueId(), "Cancelled booking " + bid);
+            logHistory("BOOKING_CANCELLED", currentUser.getStudentId(), target.getVenueId(),
+                    "Cancelled booking " + bid);
             System.out.println("Booking cancelled successfully.");
-            
+
             // Trigger Waitlist Promotion
             BookingUtils.promoteWaitlist(target);
         } else {
@@ -291,14 +334,16 @@ public class StudentModule {
      * 1. Checks existing bookings for the date/venue to identify busy slots.
      * 2. Prompts user for a start time (8 AM - 6 PM).
      * 3. Prompts user for an end time (max 2 hours from start).
-     * 4. If not a waitlist booking, prevents selecting slots that overlap with existing bookings.
+     * 4. If not a waitlist booking, prevents selecting slots that overlap with
+     * existing bookings.
      * 
      * @return String array [startTime, endTime] or null if no slots available.
      */
     private String[] selectTimeRange(BookingDQ<Booking> bookings, String vid, String date, boolean isWaitlist) {
-        boolean[] slotBooked = new boolean[20]; 
+        boolean[] slotBooked = new boolean[20];
         for (Booking b : bookings) {
-            if (b.getVenueId().equals(vid) && b.getDate().equals(date) && b.getBookingStatus() == BookingStatus.ACTIVE) {
+            if (b.getVenueId().equals(vid) && b.getDate().equals(date)
+                    && b.getBookingStatus() == BookingStatus.ACTIVE) {
                 int startH = Integer.parseInt(b.getStartTime().split(":")[0]);
                 int endH = Integer.parseInt(b.getEndTime().split(":")[0]);
                 for (int i = startH; i < endH; i++) {
@@ -342,7 +387,7 @@ public class StudentModule {
         for (int end = selectedStart + 1; end <= maxEnd; end++) {
             System.out.printf("%d. %02d:00\n", endCount + 1, end);
             availableEnds[endCount++] = end;
-            
+
             if (!isWaitlist && end < 20 && slotBooked[end]) {
                 break;
             }
@@ -358,9 +403,9 @@ public class StudentModule {
         }
         int selectedEnd = availableEnds[endChoice - 1];
 
-        return new String[]{
-            String.format("%02d:00", selectedStart), 
-            String.format("%02d:00", selectedEnd)
+        return new String[] {
+                String.format("%02d:00", selectedStart),
+                String.format("%02d:00", selectedEnd)
         };
     }
 

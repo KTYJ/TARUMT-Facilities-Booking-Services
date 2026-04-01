@@ -54,7 +54,7 @@ public class ValidationUtils {
     }
 
     /**
-     * Reads a valid Date in yyyy-MM-dd format.
+     * Reads a valid Booking Date in yyyy-MM-dd format and ensures it is not in the past.
      */
     public static String readDate(Scanner sc, String prompt) {
         String dateStr;
@@ -62,11 +62,15 @@ public class ValidationUtils {
         while (true) {
             dateStr = readNonBlankString(sc, prompt);
             try {
-                LocalDate.parse(dateStr, formatter);
-                return dateStr;
+                LocalDate date = LocalDate.parse(dateStr, formatter);
+                if (date.isBefore(LocalDate.now())) {
+                    System.out.println("\"No point looking back at the past!\"");
+                    System.out.println("ERROR: Please enter a valid future or current date.");
+                } else {
+                    return dateStr;
+                }
             } catch (DateTimeParseException e) {
-                System.out.println("Error: Invalid date format. Please use yyyy-MM-dd (e.g., 2026-03-25).");
-                System.out.print("> ");
+                System.out.println("ERROR: Invalid date format. Please use yyyy-MM-dd (e.g., " + LocalDate.now().toString() + ").");
             }
         }
     }

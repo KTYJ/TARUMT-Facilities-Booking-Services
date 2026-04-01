@@ -7,7 +7,7 @@ import control.RegisterModule;
 import control.StudentModule;
 import dao.UserDatabase;
 import model.User;
-import model.UserStatus;
+import model.status.UserStatus;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

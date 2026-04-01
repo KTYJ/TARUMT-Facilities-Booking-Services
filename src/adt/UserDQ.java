@@ -167,68 +167,6 @@ public class UserDQ extends LinkedDeque<User> {
         tail = current;
     }
 
-    // private Node<User> split(Node<User> start) {
-    // Node<User> fast = start; //end of the deque
-    // Node<User> slow = start; //middle of the deque
-
-    // // Move fast pointer two steps and slow pointer one step until fast reaches
-    // the end
-    // while (fast != null && fast.next != null) {
-    // fast = fast.next.next;
-    // if (fast != null) {
-    // slow = slow.next;
-    // }
-    // }
-
-    // // Split the list into two halves
-    // Node<User> temp = slow.next;
-    // slow.next = null;
-    // return temp;
-    // }
-
-    // //merge two sorted singly linked lists
-    // private Node<User> merge(Node<User> first, Node<User> second) {
-    // // If either list is empty, return the other list
-    // if (first == null) return second;
-    // if (second == null) return first;
-
-    // boolean pickFirst = true;
-    // //U1 = first user to compare, U2 = second user to compare
-    // if (first.data != null && second.data != null) {
-    // User u1 = first.data;
-    // User u2 = second.data;
-    // // Pick based on Student ID comparison
-    // pickFirst = u1.getStudentId().compareTo(u2.getStudentId()) <= 0;
-    // }
-
-    // // Link the result to the current node
-    // if (pickFirst) {
-    // first.next = merge(first.next, second);
-    // return first;
-    // } else {
-    // second.next = merge(first, second.next);
-    // return second;
-    // }
-    // }
-
-    // //applying mergesort on a singly linked list
-    // private Node<User> mergeSort(Node<User> start) {
-    // // Base case: if the list is empty or has only one node, it's already sorted
-    // if (start == null || start.next == null) {
-    // return start;
-    // }
-
-    // // Split the list into two halves
-    // Node<User> secondHalf = split(start);
-
-    // // Recursively sort each half
-    // start = mergeSort(start);
-    // secondHalf = mergeSort(secondHalf);
-
-    // // Merge the two sorted halves
-    // return merge(start, secondHalf);
-    // }
-
     @Override
     public Iterator<User> iterator() {
         return new DequeIterator();
