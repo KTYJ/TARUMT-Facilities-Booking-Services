@@ -371,8 +371,11 @@ public class StudentModule {
 
         int startChoice;
         while (true) {
-            startChoice = ValidationUtils.readInt(sc, "Enter choice: ");
-            if (startChoice >= 1 && startChoice <= startCount) {
+            startChoice = ValidationUtils.readInt(sc, "Enter choice (press 0 to back): ");
+            if (startChoice == 0) {
+                return null;
+            }
+            else if (startChoice >= 1 && startChoice <= startCount) {
                 break;
             }
             System.out.println("Invalid choice.");
@@ -395,8 +398,11 @@ public class StudentModule {
 
         int endChoice;
         while (true) {
-            endChoice = ValidationUtils.readInt(sc, "Enter choice: ");
-            if (endChoice >= 1 && endChoice <= endCount) {
+            endChoice = ValidationUtils.readInt(sc, "Enter choice (press 0 to CANCEL): ");
+            if (endChoice == 0) {
+                return null;
+            }
+            else if (endChoice >= 1 && endChoice <= endCount) {
                 break;
             }
             System.out.println("Invalid choice.");
