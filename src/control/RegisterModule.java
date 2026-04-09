@@ -1,5 +1,13 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package control;
 
+/**
+ *
+ * @author CHEN XIANG HUI
+ */
 import utils.ValidationUtils;
 import adt.LinkedDeque;
 import adt.VenueDQ;
@@ -10,13 +18,6 @@ import model.Venue;
 
 import java.util.Scanner;
 
-/**
- * Register module — new user registration (sent to Admin for approval).
-
- *
- * @author CHEN XIANG HUI 
-
-*/
 public class RegisterModule {
 
     private final Scanner sc;

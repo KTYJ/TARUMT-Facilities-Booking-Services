@@ -1,5 +1,13 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package control;
 
+/**
+ *
+ * @author WONG KAH LOK
+ */
 import model.status.UserRole;
 import model.status.BookingStatus;
 import model.Booking;
@@ -17,12 +25,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
-/**
- * Student module — booking, waitlist, slot viewing.
- * 
- * 
- * @author WONG KAH LOK
- */
 public class StudentModule {
 
     private final Scanner sc;

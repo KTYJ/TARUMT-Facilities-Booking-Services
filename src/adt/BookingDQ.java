@@ -6,7 +6,7 @@ package adt;
 
 /**
  *
- * @author User
+ * @author TAN JIN YUAN
  */
 import java.util.Iterator;
 import java.util.NoSuchElementException;

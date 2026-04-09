@@ -6,7 +6,7 @@ package model.status;
 
 /**
  *
- * @author User
+ * @author HENG TIAN LI
  */
 public enum BookingStatus {
     ACTIVE,

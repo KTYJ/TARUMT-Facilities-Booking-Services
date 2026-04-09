@@ -10,7 +10,7 @@ import model.User;
 
 /**
  *
- * @author KTYJ
+ * @author TAN JIN YUAN
  */
 public class UserDQ extends LinkedDeque<User> {
 

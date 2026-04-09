@@ -5,6 +5,12 @@
 
 package control;
 
+/**
+ * Admin module — all administrative operations.
+ * 
+ * @author TAN JIN YUAN
+ */
+
 import model.status.UserRole;
 import model.status.BookingStatus;
 import model.Booking;
@@ -23,11 +29,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 import model.*;
 
-/**
- * Admin module — all administrative operations.
- * 
- * @author TAN JIN YUAN KTYJ
- */
 public class AdminModule {
 
     private final Scanner sc;

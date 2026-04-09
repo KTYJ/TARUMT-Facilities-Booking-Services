@@ -1,4 +1,9 @@
 package control;
+/**
+ * Privileged-user module — express booking on assigned venues.
+ * 
+ * @author HENG TIAN LI
+ */
 
 import model.status.UserRole;
 import model.status.BookingStatus;
@@ -17,11 +22,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
-/**
- * Privileged-user module — express booking on assigned venues.
- * 
- * @author HENG TIAN LI
- */
+
 public class PrivilegedModule {
 
     private final Scanner sc;

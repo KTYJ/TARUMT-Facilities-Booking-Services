@@ -10,7 +10,7 @@ import model.Venue;
 
 /**
  *
- * @author User
+ * @author TAN JIN YUAN
  */
 public class VenueDQ<T> extends LinkedDeque<T> {
     public T find(String venueId) {

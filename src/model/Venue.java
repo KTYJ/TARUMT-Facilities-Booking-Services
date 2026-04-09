@@ -8,7 +8,7 @@ import model.status.VenueStatus;
 
 /**
  *
- * @author User
+ * @author HENG TIAN LI
  */
 public class Venue {
     private String venueId;

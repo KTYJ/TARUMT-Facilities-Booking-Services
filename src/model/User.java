@@ -1,5 +1,13 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package model;
 
+/**
+ *
+ * @author WONG KAH LOK
+ */
 import model.status.UserRole;
 import model.status.UserStatus;
 
@@ -29,12 +37,11 @@ public class User {
         this.facilityPrivilege = facilityPrivilege;
     }
 
-    /** Convenience constructor for normal user registration. */
     public User(String studentId, String password, String name) {
         this(studentId, password, name, UserRole.NORMAL_USER, UserStatus.PENDING, "NONE");
     }
 
-    // ---- Getters ----
+    //  Getters 
     public String getStudentId()        { return studentId; }
     public String getPassword()         { return password; }
     public String getName()             { return name; }
@@ -42,7 +49,7 @@ public class User {
     public UserStatus getStatus()       { return status; }
     public String getFacilityPrivilege(){ return facilityPrivilege; }
 
-    // ---- Setters ----
+    //  Setters 
     public void setStudentId(String studentId)              { this.studentId = studentId; }
     public void setPassword(String password)                { this.password = password; }
     public void setName(String name)                        { this.name = name; }
